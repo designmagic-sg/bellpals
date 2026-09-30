@@ -1,22 +1,28 @@
 # BellPals: notes for Claude Code
 
-BellPals is a social alarm app: alarms ("bells") shared with pals and crews, with a live Wake Board and Pal Rescue. **Status: planning.** There's no app code yet.
+BellPals is an alarm app for pal groups of up to 5 friends:
+- When someone's alarm rings, everyone else's phone rings 24 s later, until the owner turns it off by swiping and feeding their BellPal (a tamagotchi-style mascot).
+- **Status:** clickable web prototype in `prototype/`. The real Expo app hasn't been started.
 
 ## Read before working
-- `docs/WHAT_I_NEED_FROM_YOU.md`: open decisions (D1–D10). Don't assume an answer to anything still open.
-- `docs/PRD.md`: scope and requirement IDs (e.g. `BELL-3`, `SHARE-5`). Reference the IDs in PRs.
-- `docs/ROADMAP.md`: current phase and its exit criteria.
-- `docs/ARCHITECTURE.md`: stack, bell engine, sync model, data model.
-- `docs/DESIGN.md`: flows, screen specs, tokens, copy tone.
+- `docs/PRD.md`: requirement IDs (e.g. `RING-2`, `GROUP-3`). Reference them in PRs.
+- `docs/WHAT_I_NEED_FROM_YOU.md`: open questions Q1–Q12. Don't treat a proposed answer as decided unless the doc says so.
+- `docs/ARCHITECTURE.md`: platform constraints and how group ringing works.
+- `prototype/src/domain/`: the product rules as pure TypeScript with tests. Keep the rules there and reuse them.
+
+## Commands (prototype)
+- `cd prototype && npm install`
+- `npm test`: rule tests (Vitest)
+- `npm run typecheck`
+- `npm run build`: writes `dist/index.html` and `dist/bellpals-prototype.html` (a fragment for hosting)
 
 ## Non-negotiables
-1. **Reliability first.** Bells ring through OS alarm APIs only: AlarmKit on iOS, `AlarmManager.setAlarmClock` on Android. No silent-audio or background keep-alive hacks.
-2. **Consent first.** Never schedule a bell on someone's phone unless they accepted it (or auto-accepted it via Trusted pal).
-3. **The phone rings without the network.** The native side owns scheduled alarms. The server only orchestrates the social layer.
-4. **Explicit time.** UTC instants + IANA time zones. Every shared bell has a time mode (`instant` / `local`).
-5. **Privacy.** Wake status is visible only to that bell's participants. RLS on every table.
+1. **Real alarms only.** AlarmKit on iOS, `AlarmManager.setAlarmClock` on Android. No silent-audio or keep-alive hacks.
+2. **Pre-schedule, then control by push.** Each phone schedules its group's rings locally (owner at T, pals at T + 24 s). Pushes only cancel, stop, snooze or re-ring.
+3. **The server enforces the rules:** one alarm per day, max 5 per group, friends-only invites, owner-only delete, one snooze. Never trust the client.
+4. **Joining a group is consent** to ring for its alarms. No one else can make your phone ring.
+5. **Privacy.** Contacts are hashed on the phone and never stored. Row-level security on every table.
 
 ## Working agreements
-- Small PRs per feature. Each PR includes "How to test on your phone" steps.
-- Changes to `modules/bell-engine` or native config need a store build. JS-only changes can ship via EAS Update.
-- Prose in docs uses British spelling; code identifiers follow platform conventions.
+- Small PRs with "How to test on your phone" steps.
+- Prose in docs uses British spelling. Code identifiers follow platform conventions.

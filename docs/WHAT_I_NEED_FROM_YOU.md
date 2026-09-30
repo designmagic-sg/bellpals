@@ -1,94 +1,63 @@
 # What I need from you
 
-This is the living checklist of decisions, accounts, devices and assets needed to build BellPals. I've proposed a default for every decision. **You can reply "go with the defaults"** and just tell me which ones to change.
+## A. Try the prototype and tell me what to change
 
-## This week: top 5
+The prototype in `prototype/` is a clickable version of the whole spec. A published link is shared in our chat.
+- On a computer you'll see the phone, a *Prototype controls* panel, and your pals' phones live.
+- On a phone, use the **Demo** button in the top-right corner.
 
-1. **Answer the decisions in section A**, or accept the defaults.
-2. **Start the Apple Developer and Google Play organisation sign-ups.**
-   - Organisation accounts need a **D-U-N-S number**. It's free, but it can take 1–2 weeks, so it's the slowest step.
-   - An organisation Play account also avoids Google's *12 testers × 14 days* closed-test rule for new personal accounts.
-3. **Check the name is free:**
-   - search "BellPals" on the App Store and Google Play
-   - check the domain (`bellpals.app` / `bellpals.com`)
-   - run an [IPOS](https://www.ipos.gov.sg/) trademark search
-4. **Line up test phones:**
-   - an iPhone on iOS 26 or 27
-   - a Samsung and/or Xiaomi/Oppo Android phone
+Things worth trying:
+1. Sign in, pick a BellPal, set an alarm.
+2. **Pals → accept Aisha's invite** to Morning Crew.
+3. **Ring my alarm now.** Watch your pals' phones start ringing 24 s later. Snooze once, then swipe and feed.
+4. **Ring their alarm.** A pal's alarm rings on *your* phone 24 s after theirs.
+5. **BellPal level +/-** and **See all 15 BellPal forms**.
+6. Profile → **Delete account** (type DELETE).
 
-   Simulators can't prove an alarm really rings.
-5. **Pick a brand direction** (A, B or C in [DESIGN.md §7](DESIGN.md#7-visual-direction)), or send existing brand assets or a Figma link.
+## B. Questions about the rules
 
----
+The prototype uses the proposed answer for each question. Reply with the number and your choice, e.g. "Q2: 15 min".
 
-## A. Decisions
+| # | Question | Proposed answer (used in the prototype) |
+|---|---|---|
+| Q1 | How long is a snooze? | **5 minutes.** The prototype has a 15-second demo switch |
+| Q2 | If the owner never turns the alarm off (asleep, or phone dead), pals' phones would ring forever. Should there be a cut-off? | **Yes: stop every phone after 10 minutes**, and the BellPal misses its meal. *Not in the prototype yet* |
+| Q3 | How many fed mornings to go up one level? | **3 per level for Lv 1–5, 5 for Lv 6–10, 7 for Lv 11–15.** That's about 68 mornings to Lv 15. Alternative: 1 feed = 1 level (Lv 15 in 15 mornings) |
+| Q4 | If a group owner deletes their account, what happens to the group? | **The group is deleted for everyone.** Alternative: ownership passes to the longest-standing member |
+| Q5 | Can someone be in more than one pal group? | **No, one group at a time**, so nobody's phone rings for 10+ alarms a day |
+| Q6 | Who can invite people into a group? | **Any member** can invite their own friends. Alternative: owner only |
+| Q7 | While a pal's alarm rings on my phone, can I do anything (e.g. mute my own phone for a minute)? | **No**, as in your spec. Note that on iPhone, Apple's alarm screen always has a Stop button; we'll re-ring if it's tapped too early |
+| Q8 | "Sunday to Monday": I read this as any day of the week, Sunday to Saturday. Right? | **Yes, any day from Sunday to Saturday** |
+| Q9 | Can people switch to a different BellPal later? | **No**, you pick once at sign-up |
+| Q10 | Should anything happen to the BellPal when its owner sleeps through? | **Nothing for now** |
+| Q11 | Pals in other time zones ring at the owner's alarm moment (maybe 3 a.m. for them). OK? | **Yes**, it's the same instant for everyone |
+| Q12 | Finding friends in contacts needs a match. Phone-number matching needs SMS verification, which costs money per text. | **v1: match by email, and invite everyone else with a link.** Phone numbers later if needed |
 
-| # | Decision | My recommended default | Why it matters |
-|---|---|---|---|
-| D1 | **Launch audience and market** | Friend groups aged 18–30 in **Singapore**, English only | Shapes onboarding copy, launch channels and store listings |
-| D2 | **Platforms and minimum OS** | **iOS + Android together**. iOS 26+ (required for AlarmKit), Android 10+, phones only | iOS-only would roughly halve the Phase 0 spike, but friend groups use both platforms |
-| D3 | **MVP scope** | As in [PRD §9](PRD.md#9-mvp-requirements): Crew and Pal Bells, Wake Board, Pal Rescue, Backup Bell, Voice Bells. Missions and widgets come later | Scope is the biggest driver of the launch date |
-| D4 | **Sign-in methods** | Apple + Google + email code. **No SMS in v1** (it costs money per text and is heavier on privacy) | Affects onboarding friction and contact discovery |
-| D5 | **Tech stack** | **Expo (React Native/TypeScript)** + native alarm modules + **Supabase** (Singapore region) | Tell me if you or your team prefer Flutter, native or Firebase |
-| D6 | **Business model** | **Free at launch.** BellPals+ subscription later. Never charge for receiving bells | Affects the paywall design and the growth loop |
-| D7 | **Who designs the UI** | **designmagic designs in Figma** from [DESIGN.md](DESIGN.md), and I build from the Figma file. Alternatively, I design directly in code from the brief | Sets how Phase 1–2 design handoff works |
-| D8 | **Brand direction** | **A · Sunrise Social** | Needed before tokens, components and the app icon |
-| D9 | **Publisher entity** | Publish under an existing company, or set up a new one (e.g. BellPals Pte. Ltd.) | Appears on the store listings. Needs D-U-N-S; affects PDPA/legal ownership |
-| D10 | **Team, pace and budget** | You + Claude Code at ~1 FTE, with a ~US$1k year-1 infrastructure budget | Timeline estimates assume this; at half-time, double them |
+## C. Design
 
-**Product defaults I'll assume unless you object**
-- Time mode: *same moment* for one-time crew bells, *same local time* for repeating ones.
-- Snooze 9 min · Backup Bell at T+10 · Pal Rescue at T+15 · wake window 60 min · max 3 nudges per pal per bell.
-- Quiet hours 23:00–07:00 for requests. Crews up to 20 people. Voice clips up to 30 s, deleted 30 days after the bell.
-- Minimum age 13+.
+- [ ] **Final BellPals:** 5 characters × 3 evolution stages = **15 designs**, with names and personalities. The prototype's Ding, Chime, Buzz, Jingle and Gong are placeholders.
+- [ ] **5 treats**, one favourite per BellPal.
+- [ ] **Moods** for the animations: idle, sleepy, ringing, hungry, mouth wide open, chomp, happy.
+- [ ] **App icon and colours.** Keep or replace the prototype's cream, coral and midnight look.
+- [ ] **2 alarm sounds:** your alarm, and a pal's alarm.
+- [ ] Figma links as the screens take shape. I can build directly from them.
 
-## B. Accounts to create
+## D. Accounts: later, as you said
 
-Only you can create these. **Never paste keys or passwords into chat.** When a step needs a secret, I'll say exactly which one to add to GitHub Actions secrets, EAS secrets or this Claude environment's secrets.
+You don't need any store accounts to review the prototype. They become necessary at these points:
 
-| ✓ | Account | Cost | Needed by | Notes |
-|---|---|---|---|---|
-| [ ] | **D-U-N-S number** for the publishing company | Free | Now | Needed by both Apple and Google for organisation accounts |
-| [ ] | **Apple Developer Program** (organisation) | US$99/yr | Phase 0 (spike on real iPhones) | Enables TestFlight, AlarmKit on device and push (APNs key) |
-| [ ] | **Google Play Console** (organisation) | US$25 once | Phase 1 | Organisation accounts skip the 12-tester rule. Complete identity verification early |
-| [ ] | **Expo account + organisation** (`bellpals`) | Free to start | Phase 0 | For EAS builds. Later you'll add an `EXPO_TOKEN` to GitHub secrets for CI |
-| [ ] | **Supabase** (staging + production projects, Singapore region) | Free → ~US$25/mo | Phase 1 | Invite me via keys in secrets when we get there |
-| [ ] | **Firebase project** (FCM only) | Free | Phase 2 | Android push needs FCM credentials, even with Expo Push |
-| [ ] | **Domain** (e.g. `bellpals.app`) + support email | ~US$15–25/yr | Phase 2 | For invite links, the landing page and the privacy policy URL |
-| [ ] | Sentry, PostHog | Free tiers | Phase 1 / 3 | |
-| [ ] | RevenueCat | Free to start | Post-launch | Only when BellPals+ happens |
+| Account | Needed for | When |
+|---|---|---|
+| **Apple Developer Program** (US$99/yr) | Testing on real iPhones with push notifications, which the group ringing depends on. A free Apple ID can't use push | Phase 1 (iPhone part). We can start Phase 1 on Android only while you set this up |
+| **Google Play Console** (US$25 once) | Closed beta and release. Use an **organisation** account to avoid the "12 testers × 14 days" rule for personal accounts | Phase 5 |
+| Expo, Supabase, Firebase | Builds, backend, Android push. All have free tiers | Phase 1–2. I'll say exactly when and which keys to add as secrets. Never paste keys in chat |
 
-## C. Devices and people
+**Organisation accounts** need a D-U-N-S number. It's free, but can take 1–2 weeks, so it's worth starting early.
 
-- [ ] **Test phones:**
-  - an iPhone on iOS 26/27, ideally two so both versions get covered
-  - a **Samsung** and/or **Xiaomi/Oppo** (aggressive battery management), ideally a **Pixel** as well
-- [ ] **A Mac with Xcode**, if you have one. It helps a lot when debugging the iOS alarm module; EAS can build without it.
-- [ ] **Your time for device testing.** Each spike or release-candidate run takes about 30–45 min. I'll give you a scripted checklist, because I can't physically hear an alarm ring from the cloud.
-- [ ] **A dogfood crew of 5–10 friends** for Phase 2 (early December).
-- [ ] **20–50 beta testers** for Phase 3, including **at least 12 on Android** who stay opted in for 14 days.
+## E. Phones for the real-phone test (Phase 1)
 
-## D. Design and brand
+Group ringing needs **several phones at once**:
+- at least 2 iPhones on iOS 26 or 27
+- at least 2 Android phones, ideally one Samsung or Xiaomi, since those brands are strict about background apps
 
-- [ ] Brand direction (D8) or existing brand guidelines.
-- [ ] Logo and app icon. Tell me if designmagic is doing these, or if I should propose concepts.
-- [ ] **A Figma file link** once screens exist. I can read it through the Figma connector and build from it.
-- [ ] **Sounds:** a signature chime plus 8+ alarm tones, commissioned or licensed with an app-distribution licence. I can write the sound brief.
-- [ ] Approval of the **tone of voice** ([DESIGN.md §9](DESIGN.md#9-voice-and-tone)).
-- [ ] Later: store screenshots, a preview video and the landing page.
-
-## E. Legal and admin
-
-- [ ] The **company** that publishes the app (D9), and a **Data Protection Officer** contact (PDPA).
-- [ ] **Trademark and name check** for "BellPals" (IPOS, plus any markets you plan to enter).
-- [ ] **Privacy policy and terms.** I'll draft them for a lawyer to review before the beta.
-- [ ] A **support email address** (e.g. `hello@bellpals.app`).
-- [ ] Before scaling: a **freedom-to-operate check** on group-alarm patents with an IP lawyer. Low priority for the MVP.
-
----
-
-## What happens after you reply
-
-1. I update the PRD and roadmap with your decisions and record them as ADRs.
-2. **Phase 0 starts:** I build the alarm-engine spike app and write your device test checklist.
-3. You run the checklist on your phones. We review the reliability report together and make the **go/no-go call (M0)**.
+They can be friends' phones.

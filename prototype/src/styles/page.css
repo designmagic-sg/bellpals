@@ -1,0 +1,492 @@
+/* The page around the phone. It follows the viewer's light or dark theme;
+   the app inside the phone keeps its own palette (see app.css). */
+:root {
+  --page-bg: #f3f0fa;
+  --page-surface: #ffffff;
+  --page-ink: #231e3d;
+  --page-muted: #5f5980;
+  --page-line: #e2ddf0;
+  --page-chip: #eeeaf7;
+  --btn-primary-bg: #e0492a;
+  --btn-primary-ink: #ffffff;
+  --font-display: 'Fredoka', 'Nunito', ui-rounded, system-ui, sans-serif;
+  --font-body: 'Nunito', ui-rounded, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --page-bg: #100e1f;
+    --page-surface: #1b1830;
+    --page-ink: #eeebfa;
+    --page-muted: #a7a1c4;
+    --page-line: #2c2748;
+    --page-chip: #262143;
+    --btn-primary-bg: #ff8a6b;
+    --btn-primary-ink: #231e3d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --page-bg: #100e1f;
+  --page-surface: #1b1830;
+  --page-ink: #eeebfa;
+  --page-muted: #a7a1c4;
+  --page-line: #2c2748;
+  --page-chip: #262143;
+  --btn-primary-bg: #ff8a6b;
+  --btn-primary-ink: #231e3d;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  margin: 0;
+  background: var(--page-bg);
+  color: var(--page-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+body:has(.stage.compact) {
+  background: #fff4e8;
+}
+
+/* ---- Desktop: controls | phone | group ---- */
+.stage {
+  min-height: 100%;
+  display: grid;
+  grid-template-columns: minmax(250px, 330px) auto minmax(250px, 330px);
+  justify-content: center;
+  align-items: start;
+  gap: 28px;
+  padding: 24px 20px 32px;
+}
+.side {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  min-width: 0;
+}
+.device {
+  position: sticky;
+  top: 16px;
+}
+@media (max-width: 1200px) {
+  .stage {
+    grid-template-columns: minmax(260px, 360px) auto;
+  }
+  .side.left {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .side.right {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .device {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+}
+
+.phone {
+  width: 390px;
+  height: min(844px, calc(100vh - 48px));
+  min-height: 660px;
+  padding: 11px;
+  border-radius: 56px;
+  background: #16132b;
+  box-shadow:
+    0 0 0 2px #2e2950,
+    0 40px 80px -30px rgba(35, 30, 61, 0.55);
+}
+
+/* ---- Phone-sized screens: the app fills the page ---- */
+.stage.compact {
+  display: block;
+  min-height: 0;
+  height: 100%;
+  padding: 0;
+}
+.phone.is-compact {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.demo-fab {
+  position: fixed;
+  right: 12px;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  z-index: 60;
+  font: 800 13px var(--font-body);
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 0;
+  background: #2a2344;
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+.demo-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(15, 12, 30, 0.5);
+  display: flex;
+  align-items: flex-end;
+}
+.demo-sheet {
+  width: 100%;
+  max-height: 90%;
+  overflow-y: auto;
+  background: var(--page-bg);
+  color: var(--page-ink);
+  border-radius: 22px 22px 0 0;
+  padding: 14px 14px calc(18px + env(safe-area-inset-bottom, 0px));
+  display: grid;
+  gap: 12px;
+}
+
+/* ---- Panels ---- */
+.panel {
+  background: var(--page-surface);
+  border: 1px solid var(--page-line);
+  border-radius: 20px;
+  padding: 18px;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.panel p {
+  margin: 0;
+}
+.panel h1 {
+  font: 700 26px/1.15 var(--font-display);
+  margin: 0;
+  text-wrap: balance;
+}
+.panel h2 {
+  font: 700 19px/1.2 var(--font-display);
+  margin: 0;
+}
+.panel h3 {
+  font: 800 12px/1.2 var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--page-muted);
+  margin: 0;
+}
+.intro-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 700 18px var(--font-display);
+}
+.intro-brand svg {
+  width: 34px;
+  height: 34px;
+}
+.intro p {
+  color: var(--page-muted);
+  line-height: 1.5;
+}
+.try-list {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 6px;
+  font-size: 14.5px;
+  line-height: 1.45;
+}
+.demo-block {
+  display: grid;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--page-line);
+}
+.demo-btn {
+  font: 800 14px/1.2 var(--font-body);
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--page-line);
+  background: var(--page-chip);
+  color: var(--page-ink);
+  cursor: pointer;
+  text-align: center;
+}
+.demo-btn:hover:not(:disabled) {
+  border-color: var(--page-muted);
+}
+.demo-btn.primary {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-ink);
+  border-color: transparent;
+}
+.demo-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.demo-btn.subtle {
+  background: transparent;
+  color: var(--page-muted);
+}
+.demo-btn.close {
+  justify-self: start;
+}
+.demo-note {
+  font-size: 13.5px;
+  color: var(--page-muted);
+  line-height: 1.45;
+}
+.demo-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.demo-row > * {
+  flex: 1 1 auto;
+}
+.demo-row select {
+  font: 700 14px var(--font-body);
+  padding: 9px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--page-line);
+  background: var(--page-surface);
+  color: var(--page-ink);
+}
+.demo-friend {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 14px;
+  background: var(--page-chip);
+}
+.demo-switch {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.demo-switch input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--btn-primary-bg);
+}
+.level-stepper {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+.level-stepper button {
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--page-line);
+  background: var(--page-chip);
+  color: var(--page-ink);
+  font: 800 22px var(--font-body);
+  cursor: pointer;
+}
+.level-stepper button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.level-stepper span {
+  font: 700 20px var(--font-display);
+}
+.level-stepper small {
+  display: block;
+  font: 700 12px var(--font-body);
+  color: var(--page-muted);
+}
+:focus-visible {
+  outline: 3px solid #4db5ff;
+  outline-offset: 2px;
+}
+
+/* ---- Group simulator: small phones in the app's own colours ---- */
+.sim-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.mini-phone {
+  border-radius: 22px;
+  padding: 5px;
+  background: #16132b;
+}
+.mini-screen {
+  border-radius: 18px;
+  background: #fff4e8;
+  color: #2a2344;
+  padding: 8px 8px 12px;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  text-align: center;
+  min-height: 160px;
+  align-content: start;
+}
+.mini-screen .bp {
+  width: 76px;
+}
+.mini-screen strong {
+  font: 700 15px var(--font-display);
+}
+.mini-state {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f1e3d3;
+  font-variant-numeric: tabular-nums;
+}
+.mini-screen small {
+  font-size: 11.5px;
+  color: #5e5780;
+}
+.mini-phone.is-ringing {
+  animation: mini-ring 0.45s ease-in-out infinite;
+  box-shadow: 0 0 0 3px #ff7a59;
+}
+.mini-phone.is-ringing .mini-screen {
+  background: #1e2554;
+  color: #f5f3ff;
+}
+.mini-phone.is-ringing .mini-state {
+  background: #ff7a59;
+  color: #2a2344;
+}
+.mini-phone.is-ringing .mini-screen small {
+  color: #b7bbe0;
+}
+.mini-phone.is-waiting .mini-state {
+  background: #ffe3a3;
+}
+.mini-phone.is-snoozed .mini-screen {
+  background: #e9e4ff;
+}
+@keyframes mini-ring {
+  0%,
+  100% {
+    transform: rotate(-1.6deg);
+  }
+  50% {
+    transform: rotate(1.6deg);
+  }
+}
+
+/* ---- Gallery of all BellPal forms ---- */
+.gallery-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(15, 12, 30, 0.55);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.gallery {
+  width: min(760px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  background: var(--page-surface);
+  color: var(--page-ink);
+  border-radius: 22px;
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+}
+.gallery-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.gallery-head h2 {
+  font: 700 22px var(--font-display);
+  margin: 0 0 4px;
+}
+.gallery-head p {
+  margin: 0;
+}
+.gallery-grid {
+  display: grid;
+  grid-template-columns: 110px repeat(3, minmax(0, 1fr));
+  gap: 8px 10px;
+  align-items: center;
+}
+.gallery-col-head {
+  font: 700 15px var(--font-display);
+  text-align: center;
+}
+.gallery-col-head small,
+.gallery-row-head small {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  font: 700 12px var(--font-body);
+  color: var(--page-muted);
+}
+.gallery-row-head {
+  display: grid;
+  gap: 2px;
+}
+.gallery-row-head strong {
+  font: 700 17px var(--font-display);
+}
+.gallery-row-head small {
+  justify-content: flex-start;
+}
+.gallery-row-head .treat-art {
+  width: 18px;
+  height: 18px;
+}
+.gallery-cell {
+  margin: 0;
+  background: #fff4e8;
+  border-radius: 16px;
+  padding: 4px 6px 10px;
+  text-align: center;
+}
+.gallery-cell .bp {
+  width: 100%;
+  max-width: 140px;
+}
+.gallery-cell figcaption {
+  font: 700 13px var(--font-display);
+  color: #2a2344;
+}
+@media (max-width: 560px) {
+  .gallery-grid {
+    grid-template-columns: 64px repeat(3, minmax(0, 1fr));
+  }
+  .gallery-row-head small {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

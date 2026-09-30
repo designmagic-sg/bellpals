@@ -1,27 +1,31 @@
 # BellPals 🔔
 
-**The alarm clock your friends are in on.** Set bells for yourself, your pals or your whole crew. See who's up, and rescue anyone who isn't.
+**An alarm app for friends.** Join a pal group of up to 5 people:
+- **Shared ringing:** when anyone's alarm rings and they're not up within 24 seconds, everyone's phone rings too, until that person turns it off.
+- **Turning it off:** swipe, then feed your **BellPal**, a mascot that levels up and evolves as you feed it every morning.
 
-> **Status: planning (Phase 0).** There's no app code yet. This repo holds the product plan.
+> **Status:** clickable prototype ready. The real app hasn't been started yet.
 
-## Start here
+## Try the prototype
+
+The prototype is a web version of the full spec with simulated friends:
+
+```bash
+cd prototype
+npm install
+npm run dev       # open the printed URL
+npm test          # rule tests: 24 s delay, one snooze, group cap, treats per level…
+npm run build     # one self-contained HTML file in prototype/dist/
+```
+
+See [prototype/README.md](prototype/README.md) for what's simulated.
+
+## The plan
 
 | Doc | What's in it |
 |---|---|
-| **[What I need from you](docs/WHAT_I_NEED_FROM_YOU.md)** | Decisions (with recommended defaults), accounts, devices and assets needed to start. **Read this first** |
-| [PRD](docs/PRD.md) | Problem, users, competitors, MVP requirements, metrics, risks |
-| [Roadmap](docs/ROADMAP.md) | Phases, milestones and exit criteria. Target public launch: late Jan 2027 |
-| [Design brief](docs/DESIGN.md) | UX principles, platform constraints, flows, screen specs, visual direction, tone of voice |
-| [Architecture](docs/ARCHITECTURE.md) | Stack, native alarm engine, sync model, data model, security, the Phase 0 reliability spike |
-
-## BellPals in 30 seconds
-
-- **Crew Bells:** one bell for the whole group (early flight, gym, exam day). Everyone's phone rings, and a live **Wake Board** shows who's up.
-- **Pal Bells:** set a bell for a friend. They accept, it rings on their phone, and you find out when they're up.
-- **Voice Bells:** wake up to a pal's recorded voice.
-- **Pal Rescue:** if you haven't checked in, a Backup Bell rings and your pals get a *Nudge* button.
-- **Consent first:** nobody can make your phone ring unless you've said yes.
-
-## Proposed stack
-
-Expo (React Native + TypeScript), with native Swift/Kotlin alarm modules (**AlarmKit** on iOS 26+, **AlarmManager** on Android) and a **Supabase** backend in the Singapore region. See [Architecture](docs/ARCHITECTURE.md).
+| [What I need from you](docs/WHAT_I_NEED_FROM_YOU.md) | Prototype feedback, 12 questions about the rules, design assets, accounts (later) |
+| [PRD](docs/PRD.md) | Every requirement with an ID, plus what iPhone and Android allow |
+| [Roadmap](docs/ROADMAP.md) | Prototype → real-phone test → build → beta → stores (about 17 weeks) |
+| [Design](docs/DESIGN.md) | Screens, the 15 BellPal forms, visual direction, what the design team delivers |
+| [Architecture](docs/ARCHITECTURE.md) | How group ringing works on each platform, data model, test matrix |
