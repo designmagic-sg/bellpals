@@ -86,7 +86,8 @@ game/
 
 - **Create a world:** pick a world name. The server makes a code: a 4-letter word, a dash and 4 digits (e.g. `MOON-4821`). It uses a short list of friendly words and leaves out letters and numbers that are easy to mix up.
 - **Join:** type the code, pick a nickname and a character.
-- **Up to 4 players at a time** per world. Two players can be the same character; name tags tell them apart.
+- **Up to 8 players at a time** per world (owner's decision). Two players can be the same character; name tags tell them apart.
+- **What friends share** *(my call, not yet confirmed by the owner)*: one farm and one quest board for the whole world. Anyone can till, plant, water and harvest anywhere on the farm, and an unlocked zone opens for everyone. **Coins, bag and tools are each player's own.** Selling pays whoever sold, and only you can spend your Stones. Quest goals count everyone's contributions ("Catch 3 fish" can be 2 by one friend and 1 by another), and coin rewards go to everyone who helped.
 - **Saving:** every 30 seconds while anyone is in the world, and when the last player leaves.
 - The **creator is the world's owner.** For now the only owner-only power is removing a player from the world.
 
@@ -96,7 +97,13 @@ game/
 - Morning starts at 06:00. It gets dark from 18:00 and is fully night from 20:00 until 05:00.
 - **Night is darker, not black.** A blue tint, with lights from windows and lanterns. Some fish and animals only appear at night.
 - **Sleeping:** go to bed in the house to end the day. With several players online, the day ends when **everyone online is in bed**, then morning comes for all. At 02:00 anyone still awake faints and wakes up at home, and the day ends anyway.
-- **When nobody is online, time stops** and crops wait. ⚠️ *Open, see §9.*
+- **When nobody is online, the clock stops** (owner's decision). When someone comes back, the world carries on from the same time of day.
+- **But the world still catches up on what happened while it was empty** (owner's decision). On the first join, the server works out how much real time has passed since the last player left and applies it, at the normal rate of one in-game day per 24 real minutes:
+  - Crops that were **watered when the last player left** keep growing until they're fully grown. Soil doesn't dry out while the world is empty, so watering before you log off pays off. Unwatered crops wait.
+  - Crops that keep fruiting (strawberries) end up with one harvest ready. They don't pile up.
+  - Animals and anything else that restocks fill back up to their full numbers.
+  - Nothing dies or rots while you're away.
+  - The catch-up is a pure function in `shared/` (`catchUp(world, elapsedMs)`) with tests, so its rules are easy to change.
 - **The clock** sits in a top corner. It's a ring of dark stone with gold engraving. A sun and a moon ride on an arm that turns around it, through a sky disc that shifts from dawn gold to midnight blue. The day number and time are under it. I'll mock it up for the owner to approve before it goes in.
 
 ### 6.6 Players
@@ -170,6 +177,15 @@ Each step is a playable checkpoint.
 - How the art script slices and cleans the sheets (extend `prototype/scripts/make_sprites.py`, copied into `game/art/`).
 - How the server stores world state (a JSON snapshot per world is fine to start).
 
-## 9. Open questions for the owner
+## 9. Decisions log
 
-See the conversation. The answers will be written in here.
+| Question | Answer | By |
+|---|---|---|
+| Separate from the BellPals app? | Yes. Only the characters are reused. | Owner |
+| Kind of game | Like Stardew Valley: farming, gathering and unlocking, not block-building | Owner |
+| Platform | Web browser now; mobile or Steam later | Owner |
+| Multiplayer | Shared worlds joined by a code | Owner |
+| How it's built | A game server (Colyseus) with a Phaser client | Owner |
+| Players per world | Up to 8 | Owner |
+| Time when no one's online | The clock pauses; crops and restocking catch up on the time that passed (§6.5) | Owner |
+| What friends share | Farm and quests shared; coins, bag and tools each player's own | Claude's call, to confirm |
