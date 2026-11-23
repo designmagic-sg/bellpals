@@ -1,10 +1,12 @@
-# Pal Patch: a shared farming world (design)
+# RumiNation: a shared farming world (design)
 
-*Working title. Status: draft for approval, 23 Nov 2026.*
+*Status: approved by the owner, 23 Nov 2026, with additions (crafting, mining, new top-tier gear) folded in the same day.*
+
+The full list of items and recipes is in [the catalogue](2026-11-23-ruminate-catalogue.md).
 
 ## 1. Intent
 
-A cosy 2D farming game you play in the browser with friends. It plays like Stardew Valley: farm, fish, explore and earn, with new land unlocking as you go. You play as one of the four pixel characters from BellPals (Ding the bear, Chime the fox, Jingle the bunny, Gong the green one). Otherwise the game has **nothing to do with the BellPals alarm app**.
+**RumiNation** is a cosy 2D farming game you play in the browser with friends. It plays like Stardew Valley: farm, fish, explore and earn, with new land unlocking as you go. You play as one of the four pixel characters from BellPals (Ding the bear, Chime the fox, Jingle the bunny, Gong the green one). Otherwise the game has **nothing to do with the BellPals alarm app**.
 
 Who it's for: the owner and their friends first, other players later. It starts in the browser and may later come to mobile and Steam.
 
@@ -17,17 +19,18 @@ Who it's for: the owner and their friends first, other players later. It starts 
 3. **Farm.** Till, plant, water and harvest vegetables and flowers on the plot in front of the house.
 4. **Fish.** Cast into the pond or river, catch fish with a short timing game, and sell them.
 5. **Hunt.** Walk into the woods, find wild animals and hunt them with gear from the shop.
-6. **Stone coins.** The currency is round stone coins with a square hole, in the style of old Chinese coins. You earn them by selling crops, fish and hunting drops. You spend them in the shop on seeds, fishing gear and hunting gear.
+6. **Rumis.** The currency is the **Rumi**, a round stone coin with a square hole in the style of old Chinese coins. You earn them by selling crops, fish, hunting drops and ores. You spend them in the shop on seeds, a pickaxe, fishing gear and hunting gear.
 7. **Quests unlock land.** A quest board lists tasks like "Catch 3 fish". Finishing one opens a fenced-off area: more farm land, the pond, deeper woods.
-8. **Expandable world.** The world is made of zones described in data. Adding an area means adding a map and one entry, not changing the code.
-9. **Day and night.** A full day–night cycle, shown on a one-of-a-kind clock with an ornate, mythic look, *inspired by* Elden Ring's style but our own design.
-10. **Saved worlds.** The world (fields, crops, unlocked land, each player's bag and coins) is saved on the server and is still there when you come back.
+8. **Mine and smith.** Mine rocks for ore and gems. Turn materials from fish, animals, crops and the mine into **25 craftable weapons, tools and appliances**, from more than **100 crafting items** (see the catalogue).
+9. **Expandable world.** The world is made of zones described in data. Adding an area means adding a map and one entry, not changing the code.
+10. **Day and night.** A full day–night cycle, shown on a one-of-a-kind clock with an ornate, mythic look, *inspired by* Elden Ring's style but our own design.
+11. **Saved worlds.** The world (fields, crops, unlocked land, each player's bag and coins) is saved on the server and is still there when you come back.
 
 ## 3. Non-goals (not in this version)
 
 - Phone touch controls, a mobile app, or a Steam build. We keep the door open (see §6.8) but don't build them.
 - Accounts with email and password. Players are known by a key their browser keeps (see §6.6).
-- Seasons, weather, crafting, cooking, stamina or energy.
+- Seasons, weather, cooking, stamina or energy.
 - Villagers to befriend, relationships, combat against monsters, or a story.
 - Text chat (friends will usually be on a call). Emotes are in (§6.9).
 - Public world lists or matchmaking with strangers. You only get in with a code.
@@ -47,7 +50,7 @@ Who it's for: the owner and their friends first, other players later. It starts 
 - TypeScript throughout, like the existing `prototype/`.
 - Lives in a new `game/` folder in this repo. It doesn't share code with `prototype/` apart from the character art.
 - The character art is four pose sheets, each 4 × 2 poses: front, three-quarter, side, back, walk, jump, sit, sleep. Each character has **one** walk frame and **one** side view.
-- There's no other art, so I'll draw the tiles, crops, fish, animals, tools, the coin and the clock as pixel art in the characters' palette (dark plum outline, soft pastels). They're built to be swapped for final art later.
+- There's no other art, so I'll draw the tiles, crops, fish, animals, ores, items, tools, the coin and the clock as pixel art in the characters' palette (dark plum outline, soft pastels). They're built to be swapped for final art later.
 - Prose in docs uses British spelling.
 
 ## 6. How it works
@@ -66,7 +69,7 @@ The owner chose the game server.
 
 ```
 game/
-  shared/   game rules as pure TypeScript, with tests: crops, items, prices, fish, animals, quests, time, zones
+  shared/   game rules as pure TypeScript, with tests: crops, items, recipes, prices, fish, animals, ores, quests, time, zones
   server/   Colyseus game server: one "room" per world, saving to SQLite
   client/   Phaser 3 game in the browser, built with Vite
   art/      source sheets and the script that turns them into sprites
@@ -79,7 +82,7 @@ game/
 
 ### 6.3 Who decides what
 
-- **The server is the referee.** The client sends *intentions* ("till tile 12,8", "buy rod", "cast here"). The server checks them against the rules in `shared/` (are you close enough, do you own the seed, can you afford it, is the tile free) and then changes the world. Everyone sees the change.
+- **The server is the referee.** The client sends *intentions* ("till tile 12,8", "buy rod", "cast here", "craft sprinkler"). The server checks them against the rules in `shared/` (are you close enough, do you own the seed, can you afford it, is the tile free) and then changes the world. Everyone sees the change.
 - **Your own walking is predicted.** Your character moves the moment you press a key. The client sends its position about 15 times a second. The server rejects impossible jumps (too fast, through walls) and snaps you back. Other players are smoothed between updates.
 
 ### 6.4 Worlds and codes
@@ -87,7 +90,7 @@ game/
 - **Create a world:** pick a world name. The server makes a code: a 4-letter word, a dash and 4 digits (e.g. `MOON-4821`). It uses a short list of friendly words and leaves out letters and numbers that are easy to mix up.
 - **Join:** type the code, pick a nickname and a character.
 - **Up to 8 players at a time** per world (owner's decision). Two players can be the same character; name tags tell them apart.
-- **What friends share** *(my call, not yet confirmed by the owner)*: one farm and one quest board for the whole world. Anyone can till, plant, water and harvest anywhere on the farm, and an unlocked zone opens for everyone. **Coins, bag and tools are each player's own.** Selling pays whoever sold, and only you can spend your Stones. Quest goals count everyone's contributions ("Catch 3 fish" can be 2 by one friend and 1 by another), and coin rewards go to everyone who helped.
+- **What friends share** *(my call, not yet confirmed by the owner)*: one farm and one quest board for the whole world. Anyone can till, plant, water and harvest anywhere on the farm, and an unlocked zone opens for everyone. **Coins, bag and tools are each player's own.** Selling pays whoever sold, and only you can spend your Rumis. Quest goals count everyone's contributions ("Catch 3 fish" can be 2 by one friend and 1 by another), and coin rewards go to everyone who helped.
 - **Saving:** every 30 seconds while anyone is in the world, and when the last player leaves.
 - The **creator is the world's owner.** For now the only owner-only power is removing a player from the world.
 
@@ -120,28 +123,46 @@ game/
 **Farming.**
 - Hoe a grass tile in your farm area to till it. Plant a seed, then water it with the can.
 - A crop grows one stage each morning if it was watered the day before. It's ready after its number of days, and you harvest it by hand.
-- Starting crops: turnip (3 days), carrot (4), potato (5), strawberry (6, keeps fruiting). Flowers: tulip and sunflower, which sell well, and you can also leave them as decoration.
+- 14 crops, from turnip (3 days) up to the final and most valuable crop, the **Rafflesia** (14 days), a giant red jungle flower. Several crops are grown mainly for crafting: cotton, flax, indigo, lotus. The full list is in the catalogue.
+- **Rafflesia seeds** can't be bought. You get 3 for finishing the last quest. After that, the only way to get more is to put a grown Rafflesia through a seed maker.
 - Watered soil dries overnight.
 
 **Fishing.**
 - Face water with a rod and hold **Use** to choose how far to cast. Wait for a bite.
 - When a fish bites, a ring closes in around the bobber. Press **Use** while it's inside the gold band. Bigger fish need two or three hits in a row, each with a narrower band.
-- Fish depend on the place (pond or river), the time (day or night) and the rod. Rods: **bamboo rod** (starter, free), **cedar rod**, **jade rod**. Bait makes bites come sooner.
+- Fish depend on the place (pond or river), the time (day or night) and the rod. Rods, from worst to best: **bamboo rod** (starter, free), **cedar rod** (shop), **jade rod** (crafted) and the **diamond rod** (crafted, the top rod, the only one that can land a sturgeon or the dragon carp). Bait makes bites come sooner.
 
 **Hunting.**
-- Woods animals: **pheasant** (flies off), **wild boar** (charges, then gets tired), **deer** (shy, runs off) and the **night owl** (only at night).
-- Weapons: **slingshot** (cheap, 2 hits for a pheasant), **bow** (needs arrows), and a **snare** you put down and come back to later.
+- Woods animals: **pheasant** (flies off), **wild boar** (charges, then gets tired), **deer** (shy, runs off) and the **night owl** (only at night). Rare ones: the **golden pheasant** and, in the deep woods, the **white stag**.
+- Hunting tools, from worst to best: **slingshot** (shop, 2 hits for a pheasant), **bow** (shop, needs arrows), **snare** (shop, you put it down and come back later) and the **golden spear** (crafted, the top weapon, a thrown spear that catches anything in one hit, including the rare white stag). Better crafted versions of the first three are in the catalogue.
 - Aim with the mouse and fire with a click or **Use**. A hit makes the animal flash. When it's caught it vanishes in a puff of smoke and leaves a drop: feathers, hide, antler, or a "game parcel" (meat, shown wrapped as a parcel). You can sell drops or use them for quests.
 - Animals come back each morning, up to a set number per zone. If a charging boar runs into you, you're knocked back and drop nothing. There's no health bar.
 
-**Stone coins and the shop.**
-- The coin is a round grey-green stone with a square hole. We call it a **Stone**, written "◎ 25".
-- The shop is a market stall near the farm, open 08:00–18:00. It sells seeds, rods, bait, the slingshot, bow, arrows and snares, and buys crops, fish and drops.
+**Mining.**
+- Buy a **copper pickaxe** at the shop. Hit a rock a few times to break it, and it drops what's inside.
+- **Quarry** (unlockable zone): stone, flint, clay, sand, coal, copper, tin.
+- **Old mine** (unlockable zone, 3 floors for now, more can be added): iron, silver, gold, sulphur, quartz, jade, the gems and obsidian. The deeper the floor, the rarer the finds.
+- Your pickaxe decides what you can break: copper pickaxe → quarry rocks; iron pickaxe → iron, silver, quartz, jade; steel pickaxe → gold, gems, diamond, obsidian.
+- Rocks come back each morning (and catch up while the world is empty, §6.5).
+
+**Blacksmithing and crafting.**
+- A **blacksmith's shed** stands next to the house, with a **forge** (melts ore into bars and makes metal parts, weapons and tools) and a **workbench** (wooden parts, cleaning fish for scales and bones, appliances). Both are there from the start.
+- Other crafting stations are appliances you build yourself: kiln, tanning rack, loom, gem polisher.
+- **More than 100 crafting items** in five groups: what you grow, what you fish, what you hunt, what you mine, and what you make from them (bars, leather, cloth, cut gems, parts). Plus a few basics from the shop (timber, bamboo poles, resin, twine).
+- **25 craftables**: 6 hunting weapons, 4 fishing items, 4 tools and 11 appliances. Appliances are placed in the world, can be used by everyone and belong to the world. Weapons and tools go in your own bag.
+- Crafting: stand at a station and open its recipe book. It shows what you can make, what's missing and where each missing item comes from. Making something takes a moment of in-game time (bars take an hour in the forge). It's done by the server like every other action.
+- Recipes are data in `shared/recipes.ts`, and a test checks that every item can be got from somewhere and is used in something.
+
+**Rumis and the shop.**
+- The coin is a round grey-green stone with a square hole, called a **Rumi** (plural Rumis), written "◎ 25".
+- The shop is a market stall near the farm, open 08:00–18:00. It sells seeds, the copper pickaxe, the cedar rod, bait, the slingshot, bow, arrows and snares, and the basic materials. It buys crops, fish, drops, ores, gems and things you've made.
 - Prices live in `shared/` so we can balance them in one place.
 
 **Quests and land.**
 - A quest board stands by the house. Each quest has a goal and a reward of coins and/or **unlocking a zone**.
-- Starting zones: Farm, Market path. Unlockable: Pond (quest: harvest 5 turnips), East field (catch 3 fish), Woods (earn 200 Stones), River (catch a night fish), Deep woods (bring 3 hides).
+- Starting zones: Farm (with the house and the blacksmith's shed), Market path.
+- Unlockable, in order: **Pond** (harvest 5 turnips) → **East field** (catch 3 fish) → **Woods** (earn 200 Rumis) → **Quarry** (bring 5 feathers) → **River** (catch a night fish) → **Deep woods** (bring 3 hides) → **Old mine** (make 10 copper bars).
+- **Last quest:** forge the golden spear or the diamond rod. The reward is 3 Rafflesia seeds.
 - A locked zone sits behind a fence with a sign showing its quest. Unlocking plays a short animation and the fence disappears for everyone.
 
 **Expanding the world.** Each zone is its own map, drawn in Tiled (a free map editor), plus one entry in `shared/zones.ts` with its name, quest, edges, fish table and animal table. Adding land means adding a map and an entry.
@@ -165,14 +186,15 @@ The pose sheets already have jump, sit and sleep. Keys **Z**, **X** and **C** pl
 Each step is a playable checkpoint.
 
 1. **Walk together.** Server, worlds and codes, the four characters, the Farm and Market path zones, the day–night cycle and clock, saving, emotes.
-2. **Farm and earn.** Tools, crops, watering, growth, selling, Stones, the shop.
+2. **Farm and earn.** Tools, crops, watering, growth, selling, Rumis, the shop.
 3. **Fish and unlock.** Rods, the fishing game, the pond and river, the quest board, unlocking zones.
 4. **Hunt.** The woods, animals and their behaviour, slingshot, bow and snare, drops.
-5. **Polish.** Sound and music, a title screen, balancing, a hosting guide.
+5. **Mine and smith.** Pickaxes, the quarry and old mine, the forge and workbench, all 25 craftables and the whole item catalogue, the golden spear, the diamond rod, Rafflesia.
+6. **Polish.** Sound and music, a title screen with the RumiNation logo, balancing, a hosting guide.
 
 ## 8. Left to the builder
 
-- Exact prices, growth times, fish and animal tables, within the shapes above.
+- Exact prices, growth times, fish, animal and ore tables, and recipe quantities. The catalogue gives a first pass to balance from.
 - Tile size (16 px art drawn at 3× is the default) and the camera.
 - How the art script slices and cleans the sheets (extend `prototype/scripts/make_sprites.py`, copied into `game/art/`).
 - How the server stores world state (a JSON snapshot per world is fine to start).
@@ -189,3 +211,9 @@ Each step is a playable checkpoint.
 | Players per world | Up to 8 | Owner |
 | Time when no one's online | The clock pauses; crops and restocking catch up on the time that passed (§6.5) | Owner |
 | What friends share | Farm and quests shared; coins, bag and tools each player's own | Claude's call, to confirm |
+| Name | **RumiNation**; the currency is the **Rumi** | Owner |
+| Top gear | A 4th hunting tool, the **golden spear**, and a 4th rod, the **diamond rod** | Owner |
+| Final crop | **Rafflesia** | Owner |
+| Crafting | Blacksmithing with materials from fish, animals, crops and mining; pickaxe sold in the shop; 25 craftables from 100+ items | Owner |
+| Golden spear and diamond rod | Crafted only, not sold | Claude's call |
+| Rafflesia seeds | Reward for the last quest, then only from the seed maker | Claude's call |
