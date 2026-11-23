@@ -99,13 +99,14 @@ Five BellPals × three stages = **15 designs**, plus one treat each.
 
 | BellPal | Personality | Treat | Stage 1 (Lv 1–5) | Stage 2 (Lv 6–10) | Stage 3 (Lv 11–15) |
 |---|---|---|---|---|---|
-| Ding | Sunny, a bit bossy | Honey cookie | Classic bell with a handle | + bow tie | + crown, glow, sparkles |
-| Chime | A calm cat | Fish cracker | Cat ears, whiskers | Bigger ears + tail | + golden bell collar, star |
-| Buzz | A snack-powered robot | Volt candy | One antenna | Two antennae + chest light | + visor eyes, bolts |
-| Jingle | A bouncy bunny | Carrot | Bunny ears | Longer ears + flower | + bow, sparkles |
-| Gong | A small loud dragon | Dragon fruit slice | Little horns | Bigger horns + spikes | + wings |
+| Ding | A cuddly bear cub, always first up | Honey cookie | Cream bear-hood suit, red bell. Has a full pose sheet | *To design.* The prototype adds a small crown | *To design.* The prototype adds a big crown and sparkles |
+| Chime | A cheeky fox | Fish cracker | Fox hood, winking, gold bell | *To design* | *To design* |
+| Jingle | A bookish bunny | Carrot | Bunny hood, round glasses, coral bell | *To design* | *To design* |
+| Gong | A little dragon with a big voice | Dragon fruit slice | Green dragon hood with a star, pink bell | *To design* | *To design* |
+| 5th BellPal | *To design* | | | | |
 
-- The names and art are **placeholders** drawn in code for the prototype. Final names, designs and treats are yours.
+- **Stage 1 is pixel art from the design team** (sources in `prototype/art/source/`). The names, personalities, treats and the stage 2–3 crowns are placeholders.
+- The prototype turns the art into crisp sprites and paints the extra frames it needs (blinking, sleepy eyes, an open mouth) with `prototype/scripts/make_sprites.py`. Ding has a pose sheet (walk, turn around, jump, sit, sleep); the others are animated from one pose until they get theirs.
 - **Moods each BellPal needs:**
   - *idle*, which blinks and bobs
   - *sleepy*: Zzz
@@ -113,6 +114,7 @@ Five BellPals × three stages = **15 designs**, plus one treat each.
   - *hungry*: mouth open
   - *mouth wide*, when a treat is near
   - *chomp*
+  - *happy*, for petting and after a feed
   - *happy*
 - **For evolutions:** a short transition (flash → new form) plus a silhouette version for locked forms.
 

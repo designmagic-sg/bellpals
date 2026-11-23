@@ -1,7 +1,8 @@
+import { BellPalArt } from '../../components/BellPalArt';
 import { Icon } from '../../components/Icons';
 import { Button, Chip, PalAvatar, Segmented } from '../../components/ui';
 import { canInvite, seatsLeft, type Group } from '../../domain/groups';
-import { MAX_GROUP_MEMBERS } from '../../domain/rules';
+import { MAX_GROUP_MEMBERS, stageForLevel } from '../../domain/rules';
 import { nextAlarmLabel, plural } from '../../lib/format';
 import { useNow } from '../../state/clock';
 import { groupOf, invitationsForMe, memberView } from '../../state/selectors';
@@ -45,6 +46,12 @@ function GroupPanel() {
   return (
     <div className="stack">
       <section className="card group-card">
+        <div className="group-scene" aria-hidden="true">
+          {group.memberIds.map((id) => {
+            const m = memberView(state, id);
+            return m ? <BellPalArt key={id} species={m.species} stage={stageForLevel(m.level)} facing={m.isMe ? 'left' : 'right'} label="" /> : null;
+          })}
+        </div>
         <div className="group-title">
           <h2>{group.name}</h2>
           <Chip>

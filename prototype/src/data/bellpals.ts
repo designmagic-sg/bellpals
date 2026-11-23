@@ -1,70 +1,63 @@
 import { STAGE_NAMES, type Stage } from '../domain/rules';
 
-export type Species = 'ding' | 'chime' | 'buzz' | 'jingle' | 'gong';
-export type TreatKind = 'cookie' | 'fish' | 'bolt' | 'carrot' | 'dragonfruit';
+export type Species = 'ding' | 'chime' | 'jingle' | 'gong';
+export type TreatKind = 'cookie' | 'fish' | 'carrot' | 'dragonfruit';
 
 export interface BellPalInfo {
   species: Species;
   name: string;
   blurb: string;
+  /** Main colour of its suit. */
   body: string;
+  /** Its little bell. */
   accent: string;
-  cheek: string;
+  /** Soft background behind it in pictures and avatars: light centre, deeper edge. */
+  tint: [string, string];
   treat: TreatKind;
   treatName: string;
 }
 
-export const SPECIES: readonly Species[] = ['ding', 'chime', 'buzz', 'jingle', 'gong'];
+export const SPECIES: readonly Species[] = ['ding', 'chime', 'jingle', 'gong'];
 
-// Placeholder characters for the prototype; final designs come from the design team.
+// Pixel characters from the design team (4 of the planned 5). Names and personalities are placeholders.
 export const BELLPALS: Record<Species, BellPalInfo> = {
   ding: {
     species: 'ding',
     name: 'Ding',
-    blurb: 'Sunny, a bit bossy, always first up.',
-    body: '#FFC94A',
-    accent: '#FF7A59',
-    cheek: '#FF9A8A',
+    blurb: 'A cuddly bear cub who is always first up.',
+    body: '#F3DCC6',
+    accent: '#E0574F',
+    tint: ['#FFF7E2', '#FBE3AE'],
     treat: 'cookie',
     treatName: 'honey cookie',
   },
   chime: {
     species: 'chime',
     name: 'Chime',
-    blurb: 'A calm little cat who purrs you awake.',
-    body: '#6ED9B0',
-    accent: '#FF8FB1',
-    cheek: '#FF9FB8',
+    blurb: 'A cheeky fox who winks you awake.',
+    body: '#E2776E',
+    accent: '#F7B84B',
+    tint: ['#EFFBF5', '#CFEFDF'],
     treat: 'fish',
     treatName: 'fish cracker',
-  },
-  buzz: {
-    species: 'buzz',
-    name: 'Buzz',
-    blurb: 'A tiny robot that runs on snacks.',
-    body: '#6CC3FF',
-    accent: '#FFD166',
-    cheek: '#FF9FB8',
-    treat: 'bolt',
-    treatName: 'volt candy',
   },
   jingle: {
     species: 'jingle',
     name: 'Jingle',
-    blurb: 'A bouncy bunny with far too much energy.',
-    body: '#FF9CC7',
-    accent: '#8A6CFF',
-    cheek: '#FF6FA5',
+    blurb: 'A bookish bunny who has never once been late.',
+    body: '#A8AAD6',
+    accent: '#F08A73',
+    tint: ['#FFF1F6', '#F9D5E4'],
     treat: 'carrot',
     treatName: 'carrot',
   },
   gong: {
     species: 'gong',
     name: 'Gong',
-    blurb: 'A small dragon with a very big voice.',
-    body: '#B69BFF',
-    accent: '#FFB23F',
-    cheek: '#FF9FB8',
+    blurb: 'A little dragon with a very big voice.',
+    body: '#CED4B7',
+    accent: '#E7A8C8',
+    tint: ['#F5F1FF', '#E0D6FA'],
     treat: 'dragonfruit',
     treatName: 'dragon fruit slice',
   },

@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { BellPalArt } from '../../components/BellPalArt';
 import { GoogleGlyph, AppleGlyph } from '../../components/Icons';
 import { TimeWheel } from '../../components/TimeWheel';
+import { TreatArt } from '../../components/TreatArt';
 import { Button, DayPicker, StepDots } from '../../components/ui';
 import { BELLPALS, SPECIES, type Species } from '../../data/bellpals';
 import { STAGE_NAMES, formatClockTime, toClockTime, type Stage, type Weekday } from '../../domain/rules';
@@ -80,26 +81,39 @@ const LEVEL_RANGES: Record<Stage, string> = { 1: 'Lv 1–5', 2: 'Lv 6–10', 3: 
 function ChooseBellPal() {
   const { state, dispatch } = useStore();
   const [species, setSpecies] = useState<Species>(state.bellpal?.species ?? 'ding');
+  const [cheer, setCheer] = useState(true);
   const info = BELLPALS[species];
 
+  useEffect(() => {
+    setCheer(true);
+    const id = window.setTimeout(() => setCheer(false), 1600);
+    return () => window.clearTimeout(id);
+  }, [species]);
+
+  const tint = { '--room-light': info.tint[0], '--room-deep': info.tint[1] } as CSSProperties;
   return (
     <div className="screen onboarding choose">
       <StepDots step={2} />
       <h1>Pick your BellPal</h1>
-      <p className="lead">Feed it to turn off your alarm each morning. It levels up and evolves as you go.</p>
-      <div className="choose-hero">
+      <p className="lead">It wakes up with you. Feed it every morning and watch it grow.</p>
+      <div className="choose-photo" style={tint}>
+        <span className="glass-chip">Mini · Lv 1</span>
+        <span className="glass-chip right">
+          <TreatArt kind={info.treat} />
+          Loves {info.treatName}s
+        </span>
         <div className="choose-art">
-          <BellPalArt key={species} species={species} stage={1} mood="happy" />
+          <BellPalArt key={species} species={species} stage={1} mood={cheer ? 'happy' : 'idle'} />
         </div>
-        <div className="choose-name">
-          <strong>{info.name}</strong>
-          <span>{info.blurb}</span>
-        </div>
+      </div>
+      <div className="choose-name">
+        <strong>{info.name}</strong>
+        <span>{info.blurb}</span>
       </div>
       <div className="evo-path" aria-label={`${info.name} evolves at level 6 and level 11`}>
         {([1, 2, 3] as Stage[]).map((stage) => (
-          <div key={stage} className="evo">
-            <BellPalArt species={species} stage={stage} silhouette={stage > 1} label={stage > 1 ? 'Locked evolution' : undefined} />
+          <div key={stage} className={`evo${stage > 1 ? ' locked' : ''}`}>
+            <BellPalArt species={species} stage={stage} silhouette={stage > 1} label={stage > 1 ? `${STAGE_NAMES[stage]} ${info.name}, locked` : undefined} />
             <span>
               {STAGE_NAMES[stage]}
               <small>{LEVEL_RANGES[stage]}</small>
@@ -110,7 +124,9 @@ function ChooseBellPal() {
       <div className="choose-grid" role="radiogroup" aria-label="BellPals">
         {SPECIES.map((s) => (
           <button key={s} type="button" role="radio" aria-checked={s === species} className={`choose-card${s === species ? ' on' : ''}`} onClick={() => setSpecies(s)}>
-            <BellPalArt species={s} stage={1} label="" />
+            <span className="choose-tile">
+              <BellPalArt species={s} stage={1} label="" />
+            </span>
             <span>{BELLPALS[s].name}</span>
           </button>
         ))}

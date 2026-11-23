@@ -1,13 +1,22 @@
 import { useEffect, useState } from 'react';
-import { BellPalArt } from '../../components/BellPalArt';
-import { AppleGlyph, GoogleGlyph } from '../../components/Icons';
+import { BellPalArt, type Mood } from '../../components/BellPalArt';
+import { AppleGlyph, GoogleGlyph, Icon } from '../../components/Icons';
 import { SPECIES } from '../../data/bellpals';
 import { useStore } from '../../state/store';
 import { LogoMark } from '../Logo';
 
+// The pals on the welcome picture take turns: one rings, the others react.
+const LINEUP: Mood[][] = [
+  ['idle', 'ringing', 'idle', 'sleepy'],
+  ['happy', 'idle', 'ringing', 'idle'],
+  ['idle', 'happy', 'idle', 'ringing'],
+  ['ringing', 'idle', 'happy', 'idle'],
+];
+
 export function Welcome() {
   const { dispatch } = useStore();
   const [pending, setPending] = useState<'google' | 'apple' | null>(null);
+  const [beat, setBeat] = useState(0);
 
   useEffect(() => {
     if (!pending) return;
@@ -15,22 +24,39 @@ export function Welcome() {
     return () => window.clearTimeout(id);
   }, [pending, dispatch]);
 
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const id = window.setInterval(() => setBeat((b) => (b + 1) % LINEUP.length), 2600);
+    return () => window.clearInterval(id);
+  }, []);
+
   return (
     <div className="screen welcome">
-      <div className="welcome-hero">
-        <div className="logo">
-          <LogoMark />
-          BellPals
+      <div className="logo">
+        <LogoMark />
+        BellPals
+      </div>
+      <div className="welcome-photo">
+        <div className="glass-note">
+          <span className="clay-tile">
+            <Icon name="alarm" />
+          </span>
+          <span>
+            <strong>Your alarm · 7:00 AM</strong>
+            <small>Pals ring in 0:24 if you sleep in</small>
+          </span>
         </div>
         <div className="parade" aria-hidden="true">
           {SPECIES.map((species, i) => (
-            <div key={species} className="parade-item" style={{ animationDelay: `${i * 0.18}s` }}>
-              <BellPalArt species={species} stage={1} mood={i === 2 ? 'happy' : 'idle'} label="" />
+            <div key={species} className="parade-item">
+              <BellPalArt species={species} stage={1} mood={LINEUP[beat]![i]!} label="" />
             </div>
           ))}
         </div>
-        <h1>Wake up with your pals.</h1>
-        <p>Set your alarm. If you're still in bed 24 seconds after it rings, your whole group's phones start ringing too.</p>
+      </div>
+      <div className="welcome-copy">
+        <h1>Wake up together</h1>
+        <p>Your alarm rings. Not up in 24 seconds? Your pals' phones ring too, until you feed your BellPal.</p>
       </div>
       <div className="welcome-actions">
         <button type="button" className="btn btn-block btn-apple" onClick={() => setPending('apple')} disabled={pending !== null}>

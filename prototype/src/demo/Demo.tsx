@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BellPalArt } from '../components/BellPalArt';
+import { BellPalArt, type Mood } from '../components/BellPalArt';
 import { TreatArt } from '../components/TreatArt';
 import { BELLPALS, SPECIES, formName } from '../data/bellpals';
 import { MAX_LEVEL, STAGE_NAMES, stageForLevel, treatsForLevel, type Stage } from '../domain/rules';
@@ -157,7 +157,7 @@ export function DemoPanel({ onOpenGallery }: { onOpenGallery: () => void }) {
               </button>
             </div>
             <button type="button" className="demo-btn" onClick={onOpenGallery}>
-              See all 15 BellPal forms
+              See every BellPal and mood
             </button>
           </div>
         </>
@@ -268,11 +268,13 @@ export function Gallery({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="gallery-backdrop" onClick={onClose}>
-      <div className="gallery" role="dialog" aria-modal="true" aria-label="All BellPal forms" onClick={(e) => e.stopPropagation()}>
+      <div className="gallery" role="dialog" aria-modal="true" aria-label="BellPals and their moods" onClick={(e) => e.stopPropagation()}>
         <div className="gallery-head">
           <div>
-            <h2>All 15 BellPal forms</h2>
-            <p className="demo-note">5 BellPals × 3 evolution stages. Placeholder art for the prototype.</p>
+            <h2>BellPals and their moods</h2>
+            <p className="demo-note">
+              {SPECIES.length} BellPals × 3 stages, plus the moods you see in the app. Super and Mega wear a crown until their own art is drawn.
+            </p>
           </div>
           <button type="button" className="demo-btn" onClick={onClose}>
             Close
@@ -288,6 +290,12 @@ export function Gallery({ onClose }: { onClose: () => void }) {
               </small>
             </span>
           ))}
+          {GALLERY_MOODS.map(([, name, note]) => (
+            <span key={name} className="gallery-col-head">
+              {name}
+              <small>{note}</small>
+            </span>
+          ))}
           {SPECIES.map((species) => (
             <GalleryRow key={species} species={species} />
           ))}
@@ -296,6 +304,13 @@ export function Gallery({ onClose }: { onClose: () => void }) {
     </div>
   );
 }
+
+const GALLERY_MOODS: [Mood, string, string][] = [
+  ['happy', 'Happy', 'Tapped or fed'],
+  ['sleepy', 'Asleep', 'At night'],
+  ['ringing', 'Ringing', 'Alarm going off'],
+  ['chomp', 'Eating', 'Feeding time'],
+];
 
 function GalleryRow({ species }: { species: (typeof SPECIES)[number] }) {
   const info = BELLPALS[species];
@@ -309,8 +324,13 @@ function GalleryRow({ species }: { species: (typeof SPECIES)[number] }) {
       </span>
       {([1, 2, 3] as Stage[]).map((stage) => (
         <figure key={stage} className="gallery-cell">
-          <BellPalArt species={species} stage={stage} mood={stage === 3 ? 'happy' : 'idle'} />
+          <BellPalArt species={species} stage={stage} />
           <figcaption>{formName(species, stage)}</figcaption>
+        </figure>
+      ))}
+      {GALLERY_MOODS.map(([mood, name]) => (
+        <figure key={mood} className="gallery-cell">
+          <BellPalArt species={species} stage={1} mood={mood} label={`${info.name}, ${name.toLowerCase()}`} />
         </figure>
       ))}
     </>

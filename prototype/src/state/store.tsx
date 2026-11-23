@@ -391,7 +391,8 @@ function reducer(state: AppState, action: Action): AppState {
 
 // ---- Persistence (per browser; the prototype has no server) -----------------
 
-const STORAGE_KEY = 'bellpals-prototype-v1';
+// v2: the pixel BellPals (Buzz is gone), so older saves start fresh.
+const STORAGE_KEY = 'bellpals-prototype-v2';
 type Saved = Omit<AppState, 'sessions' | 'banners' | 'toasts' | 'sims' | 'lastFeed'>;
 
 function load(): AppState {

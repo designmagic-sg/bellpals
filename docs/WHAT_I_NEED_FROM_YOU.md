@@ -35,10 +35,12 @@ The prototype uses the proposed answer for each question. Reply with the number 
 
 ## C. Design
 
-- [ ] **Final BellPals:** 5 characters × 3 evolution stages = **15 designs**, with names and personalities. The prototype's Ding, Chime, Buzz, Jingle and Gong are placeholders.
+- [ ] **Final BellPals:** 5 characters × 3 evolution stages = **15 designs**, with names and personalities.
+  - **Received:** stage 1 of 4 characters in pixel art (bear, fox, bunny, little dragon), plus a pose sheet for the bear. They're in the prototype.
+  - **Still needed:** the 5th character, stages 2 and 3 for everyone, and pose sheets like the bear's for the other three (walk, turn around, jump, sit, sleep).
 - [ ] **5 treats**, one favourite per BellPal.
 - [ ] **Moods** for the animations: idle, sleepy, ringing, hungry, mouth wide open, chomp, happy.
-- [ ] **App icon and colours.** Keep or replace the prototype's cream, coral and midnight look.
+- [ ] **App icon and colours.** Keep or replace the prototype's off-white, coral and night look.
 - [ ] **2 alarm sounds:** your alarm, and a pal's alarm.
 - [ ] Figma links as the screens take shape. I can build directly from them.
 

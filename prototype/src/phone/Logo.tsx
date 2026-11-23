@@ -1,12 +1,26 @@
+import { useId } from 'react';
+
+/** App icon: a white bell on a coral clay tile. */
 export function LogoMark({ className = '' }: { className?: string }) {
+  const id = useId().replace(/[^a-zA-Z0-9]/g, '');
   return (
     <svg viewBox="0 0 48 48" className={`logo-mark ${className}`} aria-hidden="true">
-      <rect width="48" height="48" rx="14" fill="#2A2344" />
-      <path d="M24 9.5c-6.1 0-10.2 4.6-10.2 10.6V28l-3.3 4.3h27L34.2 28v-7.9C34.2 14.1 30.1 9.5 24 9.5z" fill="#FFC94A" />
-      <circle cx="19.5" cy="21" r="1.9" fill="#2A2344" />
-      <circle cx="28.5" cy="21" r="1.9" fill="#2A2344" />
-      <path d="M21 25.2 Q24 27.6 27 25.2" stroke="#2A2344" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-      <circle cx="24" cy="36.6" r="3.1" fill="#FF7A59" />
+      <defs>
+        <linearGradient id={`lg${id}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#E9603A" />
+          <stop offset="1" stopColor="#C23517" />
+        </linearGradient>
+      </defs>
+      <rect width="48" height="48" rx="14" fill={`url(#lg${id})`} />
+      <rect x="1" y="1" width="46" height="23" rx="13" fill="#FFFFFF" opacity="0.12" />
+      <path
+        d="M14.5 31.5V22a9.5 9.5 0 0 1 19 0v9.5l2.6 3.3H11.9z"
+        fill="none"
+        stroke="#FFFFFF"
+        strokeWidth="3"
+        strokeLinejoin="round"
+      />
+      <path d="M21 38.5a3.2 3.2 0 0 0 6 0" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" />
     </svg>
   );
 }

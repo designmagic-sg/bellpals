@@ -20,10 +20,11 @@ export function FeedingGame({ species, level, onAllFed }: { species: Species; le
   const [eaten, setEaten] = useState(0);
   const [mood, setMood] = useState<Mood>('hungry');
   const [near, setNear] = useState(false);
+  const target = mouthPoint(species, stage);
 
   const mouth = (): Mouth => {
     const rect = petRef.current!.getBoundingClientRect();
-    const point = mouthPoint(stage);
+    const point = mouthPoint(species, stage);
     return { x: rect.left + rect.width * point.x, y: rect.top + rect.height * point.y, reach: rect.width * 0.2 };
   };
 
@@ -47,6 +48,9 @@ export function FeedingGame({ species, level, onAllFed }: { species: Species; le
     <div className="feed-game">
       <div className="feed-pet" ref={petRef}>
         <BellPalArt species={species} stage={stage} mood={near && mood === 'hungry' ? 'open' : mood} />
+        {eaten < total && mood !== 'chomp' && (
+          <span className={`mouth-target${near ? ' near' : ''}`} style={{ left: `${target.x * 100}%`, top: `${target.y * 100}%` }} aria-hidden="true" />
+        )}
       </div>
       <p className="feed-count" aria-live="polite">
         {eaten >= total ? 'All fed!' : `${eaten} of ${total} ${treatWord} eaten`}

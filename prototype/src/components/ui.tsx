@@ -1,7 +1,6 @@
 import { useEffect, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react';
 import { BELLPALS, type Species } from '../data/bellpals';
 import { WEEKDAYS, WEEKDAY_LETTER, WEEKDAY_NAMES, stageForLevel, type Weekday } from '../domain/rules';
-import { WHITE, mix } from '../lib/color';
 import { BellPalArt, type Mood } from './BellPalArt';
 import { Icon } from './Icons';
 
@@ -100,7 +99,8 @@ export function PalAvatar({
   mood?: Mood;
   className?: string;
 }) {
-  const style = { width: size, height: size, '--tint': mix(BELLPALS[species].body, WHITE, 0.62) } as CSSProperties;
+  const [light, deep] = BELLPALS[species].tint;
+  const style = { width: size, height: size, '--tint': light, '--tint-deep': deep } as CSSProperties;
   return (
     <span className={`pal-avatar ${className}`} style={style}>
       <BellPalArt species={species} stage={stageForLevel(level)} mood={mood} label="" tight />

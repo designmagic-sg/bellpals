@@ -32,7 +32,7 @@ IDs are used in issues, PRs and tests.
 
 | ID | Requirement |
 |---|---|
-| PAL-1 | At sign-up you choose one of **5 BellPals**. Prototype placeholders: Ding, Chime, Buzz, Jingle, Gong. |
+| PAL-1 | At sign-up you choose one of **5 BellPals**. The prototype has the design team's first 4 pixel characters, with placeholder names: Ding (bear), Chime (fox), Jingle (bunny) and Gong (little dragon). The fifth is still to be designed. |
 | PAL-2 | A BellPal has **levels 1–15** (for now). |
 | PAL-3 | It levels up by being **fed by its owner when their alarm rings**. |
 | PAL-4 | **Treats needed to turn off an alarm:**<ul><li>Lv 1–5: 1 treat</li><li>Lv 6–10: 2 treats</li><li>Lv 11–15: 3 treats</li></ul> |

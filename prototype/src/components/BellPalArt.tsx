@@ -1,376 +1,329 @@
-import { useId, type ReactNode } from 'react';
-import { BELLPALS, formName, type Species } from '../data/bellpals';
+import { useEffect, useId, useState, type CSSProperties } from 'react';
+import chimeBase from '../assets/bellpals/chime-base.png';
+import chimeBlink from '../assets/bellpals/chime-blink.png';
+import chimeOpen from '../assets/bellpals/chime-open.png';
+import chimeSleep from '../assets/bellpals/chime-sleep.png';
+import dingBack from '../assets/bellpals/ding-back.png';
+import dingBase from '../assets/bellpals/ding-base.png';
+import dingBlink from '../assets/bellpals/ding-blink.png';
+import dingJump from '../assets/bellpals/ding-jump.png';
+import dingOpen from '../assets/bellpals/ding-open.png';
+import dingSide from '../assets/bellpals/ding-side.png';
+import dingSit from '../assets/bellpals/ding-sit.png';
+import dingSleep from '../assets/bellpals/ding-sleep.png';
+import dingThreeq from '../assets/bellpals/ding-threeq.png';
+import dingWalk from '../assets/bellpals/ding-walk.png';
+import gongBase from '../assets/bellpals/gong-base.png';
+import gongOpen from '../assets/bellpals/gong-open.png';
+import gongSleep from '../assets/bellpals/gong-sleep.png';
+import jingleBase from '../assets/bellpals/jingle-base.png';
+import jingleBlink from '../assets/bellpals/jingle-blink.png';
+import jingleOpen from '../assets/bellpals/jingle-open.png';
+import jingleSleep from '../assets/bellpals/jingle-sleep.png';
+import { formName, type Species } from '../data/bellpals';
 import type { Stage } from '../domain/rules';
-import { INK, WHITE, mix } from '../lib/color';
+import { CROWN_MEGA, CROWN_SUPER, HEART, PixelArt, SPARKLE, WAVE, ZED } from './Pixel';
 
 export type Mood = 'idle' | 'sleepy' | 'ringing' | 'hungry' | 'open' | 'chomp' | 'happy';
+/** Things the pet does on its own in its room (see PetRoom). */
+export type Action = 'walk' | 'spin' | 'sit';
 
-const SCALE: Record<Stage, number> = { 1: 0.8, 2: 0.9, 3: 1 };
-const ANCHOR_Y = 170;
-const MOUTH_Y = 124;
-const BODY = 'M54 152 C59 144 61 133 61 118 C61 79 77 50 100 50 C123 50 139 79 139 118 C139 133 141 144 146 152 Z';
-const GOLD = '#FFD84D';
-const MOUTH = '#5B2333';
-const TONGUE = '#FF7A8A';
-
-/** Where the mouth sits, as fractions of the art's width and height (used by the feeding game). */
-export function mouthPoint(stage: Stage): { x: number; y: number } {
-  return { x: 0.5, y: (ANCHOR_Y + (MOUTH_Y - ANCHOR_Y) * SCALE[stage]) / 200 };
+interface Frame {
+  src: string;
+  w: number;
+  h: number;
+  /** Mirror this frame (Ding's turn-around reuses its right-facing poses). */
+  flip?: boolean;
+  /** Poses where a crown would float in the wrong place. */
+  noCrown?: boolean;
 }
 
-interface Palette {
-  body: string;
-  light: string;
-  shade: string;
-  outline: string;
-  accent: string;
-  cheek: string;
+interface SpriteSet {
+  base: Frame;
+  blink?: Frame;
+  sleep: Frame;
+  open: Frame;
+  /** Ding has a full sprite sheet; the others are animated from one pose. */
+  happy?: Frame;
+  walk?: [Frame, Frame];
+  spin?: Frame[];
+  sit?: Frame;
+  /** Height of the base pose as a share of the square box. */
+  fit: number;
+  /** One art pixel, in sprite pixels. */
+  px: number;
+  /** Top of the head (between the ears), as a share of the base height. */
+  headTop: number;
+  /** Middle of the mouth, as shares of the base width and height. */
+  mouth: [number, number];
+  /** Head crop for round avatars: sprite width as a share of the circle, and the face's height. */
+  avatar: { w: number; fy: number };
+}
+
+const f = (src: string, w: number, h: number, extra: Partial<Frame> = {}): Frame => ({ src, w, h, ...extra });
+
+const DING_SIDE = f(dingSide, 260, 383, { noCrown: true });
+const DING_THREEQ = f(dingThreeq, 280, 371);
+
+const SPRITES: Record<Species, SpriteSet> = {
+  ding: {
+    base: f(dingBase, 289, 368),
+    blink: f(dingBlink, 289, 368),
+    sleep: f(dingSleep, 364, 275, { noCrown: true }),
+    open: f(dingOpen, 289, 368),
+    happy: f(dingJump, 285, 369),
+    walk: [DING_THREEQ, f(dingWalk, 286, 390)],
+    spin: [f(dingBase, 289, 368), DING_THREEQ, DING_SIDE, f(dingBack, 280, 375), { ...DING_SIDE, flip: true }, { ...DING_THREEQ, flip: true }],
+    sit: f(dingSit, 282, 335),
+    fit: 0.8,
+    px: 11.5,
+    headTop: 0.079,
+    mouth: [0.503, 0.522],
+    avatar: { w: 1.18, fy: 0.47 },
+  },
+  chime: {
+    base: f(chimeBase, 306, 440),
+    blink: f(chimeBlink, 306, 440),
+    sleep: f(chimeSleep, 306, 440),
+    open: f(chimeOpen, 306, 440),
+    fit: 0.86,
+    px: 11.2,
+    headTop: 0.145,
+    mouth: [0.507, 0.527],
+    avatar: { w: 1.34, fy: 0.49 },
+  },
+  jingle: {
+    base: f(jingleBase, 300, 522),
+    blink: f(jingleBlink, 300, 522),
+    sleep: f(jingleSleep, 300, 522),
+    open: f(jingleOpen, 300, 522),
+    fit: 0.92,
+    px: 10.8,
+    headTop: 0.236,
+    mouth: [0.502, 0.596],
+    avatar: { w: 1.5, fy: 0.55 },
+  },
+  gong: {
+    base: f(gongBase, 491, 468),
+    sleep: f(gongSleep, 491, 468),
+    open: f(gongOpen, 491, 468),
+    fit: 0.74,
+    px: 11,
+    headTop: 0.02,
+    mouth: [0.5, 0.498],
+    avatar: { w: 1.24, fy: 0.46 },
+  },
+};
+
+/** Mini, Super and Mega grow a little; Super and Mega also wear a crown. */
+const STAGE_SCALE: Record<Stage, number> = { 1: 0.86, 2: 0.94, 3: 1 };
+/** Where the feet stand, as a share of the box height. */
+const FLOOR = 0.94;
+
+function geometry(set: SpriteSet, stage: Stage) {
+  const height = set.fit * STAGE_SCALE[stage];
+  return { height, width: height * (set.base.w / set.base.h), unit: (height * set.px) / set.base.h };
+}
+
+/** Where the mouth sits, as shares of the art box's width and height (used by the feeding game). */
+export function mouthPoint(species: Species, stage: Stage): { x: number; y: number } {
+  const set = SPRITES[species];
+  const g = geometry(set, stage);
+  return { x: 0.5 + (set.mouth[0] - 0.5) * g.width, y: FLOOR - g.height * (1 - set.mouth[1]) };
+}
+
+/** Decode every frame up front, so the first blink or step doesn't flash. */
+export function preloadSprites(): void {
+  const frames = Object.values(SPRITES).flatMap((s) => [s.base, s.blink, s.sleep, s.open, s.happy, s.sit, ...(s.walk ?? []), ...(s.spin ?? [])]);
+  for (const frame of new Set(frames.filter((x): x is Frame => !!x).map((x) => x.src))) {
+    const img = new Image();
+    img.src = frame;
+  }
+}
+
+const pct = (n: number) => `${(n * 100).toFixed(2)}%`;
+
+function useTicker(ms: number): number {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (!ms || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const id = window.setInterval(() => setN((v) => v + 1), ms);
+    return () => window.clearInterval(id);
+  }, [ms]);
+  return n;
+}
+
+/** A stable pseudo-random number per instance, so pets don't all blink at once. */
+function useSeed(): number {
+  const id = useId();
+  let h = 7;
+  for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) % 997;
+  return h / 997;
 }
 
 interface Props {
   species: Species;
   stage: Stage;
   mood?: Mood;
-  /** Dark outline only, for evolutions that aren't unlocked yet. */
+  /** Dark shape only, for evolutions that aren't unlocked yet. */
   silhouette?: boolean;
   className?: string;
   label?: string;
-  /** Crop to the character (for small round avatars). */
+  /** Crop to the head (for small round avatars). */
   tight?: boolean;
+  action?: Action | null;
+  facing?: 'left' | 'right';
 }
 
-export function BellPalArt({ species, stage, mood = 'idle', silhouette = false, className = '', label, tight = false }: Props) {
-  const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
-  const info = BELLPALS[species];
-  const base = stage === 1 ? mix(info.body, WHITE, 0.16) : info.body;
-  const p: Palette = silhouette
-    ? { body: INK, light: INK, shade: INK, outline: INK, accent: INK, cheek: INK }
-    : {
-        body: base,
-        light: mix(base, WHITE, 0.45),
-        shade: mix(base, INK, 0.16),
-        outline: mix(base, INK, 0.62),
-        accent: info.accent,
-        cheek: info.cheek,
-      };
-  const scale = SCALE[stage];
-  const { behind, front } = features(species, stage, p, silhouette);
-  const viewBox = tight ? `${100 - 72 * scale} ${ANCHOR_Y - 136 * scale} ${144 * scale} ${148 * scale}` : '0 0 200 200';
+interface Layer {
+  frame: Frame;
+  kind: 'main' | 'blink' | 'alt' | 'hungry' | 'chomp';
+}
 
-  // An empty label marks the art as decorative (the name is shown as text nearby).
+export function BellPalArt({
+  species,
+  stage,
+  mood = 'idle',
+  silhouette = false,
+  className = '',
+  label,
+  tight = false,
+  action = null,
+  facing = 'right',
+}: Props) {
+  const set = SPRITES[species];
+  const seed = useSeed();
+  const walking = !tight && action === 'walk' && !!set.walk;
+  const spinning = !tight && action === 'spin' && !!set.spin;
+  const tick = useTicker(walking ? 210 : spinning ? 120 : 0);
+
+  let main = set.base;
+  let extra: Layer | null = null;
+  if (walking) main = set.walk![tick % 2]!;
+  else if (spinning) main = set.spin![tick % set.spin!.length]!;
+  else if (!tight && action === 'sit' && set.sit) main = set.sit;
+  else {
+    switch (mood) {
+      case 'sleepy':
+        main = tight && set.sleep.w !== set.base.w ? (set.blink ?? set.base) : set.sleep;
+        break;
+      case 'happy':
+        main = !tight && set.happy ? set.happy : set.base;
+        break;
+      case 'open':
+        main = set.open;
+        break;
+      case 'ringing':
+        main = !tight && set.happy ? set.happy : set.base;
+        extra = { frame: set.open, kind: 'alt' };
+        break;
+      case 'chomp':
+        extra = { frame: set.open, kind: 'chomp' };
+        break;
+      case 'hungry':
+        extra = { frame: set.open, kind: 'hungry' };
+        break;
+      default:
+        if (set.blink) extra = { frame: set.blink, kind: 'blink' };
+    }
+  }
+  if (silhouette) extra = null;
+  const flip = (facing === 'left') !== !!main.flip;
+  const layers: Layer[] = [{ frame: main, kind: 'main' }, ...(extra ? [extra] : [])];
+
+  const g = geometry(set, stage);
+  const box = (fr: Frame): CSSProperties => {
+    if (tight) {
+      const w = set.avatar.w * (fr.w / set.base.w);
+      const h = set.avatar.w * (set.base.h / set.base.w) * (fr.h / set.base.h);
+      return { left: pct(0.5 - w / 2), top: pct(0.5 - set.avatar.fy * h), width: pct(w), height: pct(h) };
+    }
+    const h = g.height * (fr.h / set.base.h);
+    const w = h * (fr.w / fr.h);
+    return { left: pct(0.5 - w / 2), top: pct(FLOOR - h), width: pct(w), height: pct(h) };
+  };
+
   const decorative = label === '';
+  const u = g.unit;
+  const headY = FLOOR - g.height * (1 - set.headTop);
+  const crown = stage >= 2 && !silhouette && !tight && !main.noCrown ? (stage === 3 ? CROWN_MEGA : CROWN_SUPER) : null;
+  const moodClass = walking ? 'walk' : spinning ? 'spin' : !tight && action === 'sit' ? 'sit' : mood;
+  const style = {
+    '--bp-delay': `${(-seed * 4).toFixed(2)}s`,
+    '--bp-u': pct(u),
+  } as CSSProperties;
+
   return (
-    <svg
-      viewBox={viewBox}
-      className={`bp bp-${mood}${silhouette ? ' bp-silhouette' : ''} ${className}`}
+    <span
+      className={`bp bp-${moodClass}${tight ? ' bp-tight' : ''}${silhouette ? ' bp-silhouette' : ''}${stage === 3 ? ' bp-mega' : ''} ${className}`}
+      style={style}
       role={decorative ? undefined : 'img'}
       aria-hidden={decorative || undefined}
       aria-label={decorative ? undefined : (label ?? formName(species, stage))}
     >
-      <defs>
-        <linearGradient id={`b${uid}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor={p.light} />
-          <stop offset="0.55" stopColor={p.body} />
-          <stop offset="1" stopColor={p.shade} />
-        </linearGradient>
-        <radialGradient id={`g${uid}`}>
-          <stop offset="0" stopColor={info.accent} stopOpacity="0.5" />
-          <stop offset="1" stopColor={info.accent} stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      <ellipse className="bp-ground" cx="100" cy="183" rx={40 * scale + 6} ry="7" />
-      <g className="bp-float">
-        <g transform={`translate(100 ${ANCHOR_Y}) scale(${scale}) translate(-100 -${ANCHOR_Y})`}>
-          <g className="bp-shake">
-            {stage === 3 && !silhouette && <circle cx="100" cy="108" r="94" fill={`url(#g${uid})`} />}
-            {behind}
-            <path d={BODY} fill={silhouette ? INK : `url(#b${uid})`} stroke={p.outline} strokeWidth="3.5" strokeLinejoin="round" />
-            {!silhouette && (
-              <path d="M77 98 C77 80 85 67 96 61" stroke={WHITE} strokeOpacity="0.55" strokeWidth="7" fill="none" strokeLinecap="round" />
-            )}
-            <rect x="44" y="145" width="112" height="16" rx="8" fill={p.shade} stroke={p.outline} strokeWidth="3.5" />
-            <circle cx="100" cy="169" r="8" fill={p.shade} stroke={p.outline} strokeWidth="3.5" />
-            {front}
-            {!silhouette && <Face mood={mood} p={p} visor={species === 'buzz' && stage === 3} />}
-          </g>
-        </g>
-      </g>
-      {mood === 'sleepy' && !silhouette && (
-        <g className="bp-zzz" fill={INK} fontFamily="Fredoka, Nunito, sans-serif" fontWeight="700">
-          <text x="140" y="62" fontSize="20">z</text>
-          <text x="155" y="45" fontSize="15">z</text>
-          <text x="167" y="31" fontSize="11">z</text>
-        </g>
+      {!tight && <span className="bp-ground" style={{ left: pct(0.5 - g.width * 0.42), width: pct(g.width * 0.84), top: pct(FLOOR - u * 1.4), height: pct(u * 2.8) }} />}
+      {stage === 3 && !silhouette && !tight && (
+        <span className="bp-sparkles" aria-hidden="true">
+          {[
+            [0.5 - g.width * 0.62, headY + g.height * 0.18, 0],
+            [0.5 + g.width * 0.58, headY + g.height * 0.05, 0.6],
+            [0.5 + g.width * 0.66, headY + g.height * 0.52, 1.2],
+            [0.5 - g.width * 0.56, headY + g.height * 0.62, 0.9],
+          ].map(([x, y, d]) => (
+            <PixelArt key={`${x}`} rows={SPARKLE} className="bp-sparkle" style={{ left: pct(x! - u * 2.5), top: pct(y! - u * 2.5), width: pct(u * 5), animationDelay: `${d}s` }} />
+          ))}
+        </span>
       )}
-    </svg>
-  );
-}
-
-function star(cx: number, cy: number, r: number): string {
-  return `M${cx} ${cy - r} Q${cx} ${cy} ${cx + r} ${cy} Q${cx} ${cy} ${cx} ${cy + r} Q${cx} ${cy} ${cx - r} ${cy} Q${cx} ${cy} ${cx} ${cy - r} Z`;
-}
-
-function Face({ mood, p, visor }: { mood: Mood; p: Palette; visor: boolean }) {
-  let eyes: ReactNode;
-  if (visor) {
-    eyes = (
-      <g>
-        <rect x="68" y="92" width="64" height="24" rx="12" fill={INK} />
-        {mood === 'sleepy' || mood === 'happy' || mood === 'chomp' ? (
-          <g stroke="#7CF3FF" strokeWidth="3.5" strokeLinecap="round" fill="none">
-            <path d={mood === 'sleepy' ? 'M78 103 Q85 108 92 103' : 'M78 106 Q85 99 92 106'} />
-            <path d={mood === 'sleepy' ? 'M108 103 Q115 108 122 103' : 'M108 106 Q115 99 122 106'} />
-          </g>
-        ) : (
-          <g className="bp-eyes" fill="#7CF3FF">
-            <rect x="77" y="98" width="16" height="12" rx="6" />
-            <rect x="107" y="98" width="16" height="12" rx="6" />
-          </g>
+      <span className="bp-body">
+        <span className="bp-flip" style={flip ? { transform: 'scaleX(-1)' } : undefined}>
+          {layers.map((layer) => (
+            <img key={layer.kind} className={`bp-frame bp-frame-${layer.kind}`} src={layer.frame.src} alt="" draggable={false} style={box(layer.frame)} />
+          ))}
+        </span>
+        {crown && (
+          <PixelArt
+            rows={crown}
+            className="bp-crown"
+            style={{ left: pct(0.5 - (crown[0]!.length * u) / 2), top: pct(headY - crown.length * u + u * 1.2), width: pct(crown[0]!.length * u) }}
+          />
         )}
-      </g>
-    );
-  } else if (mood === 'sleepy') {
-    eyes = (
-      <g stroke={INK} strokeWidth="3.5" strokeLinecap="round" fill="none">
-        <path d="M78 104 Q85 110 92 104" />
-        <path d="M108 104 Q115 110 122 104" />
-      </g>
-    );
-  } else if (mood === 'happy' || mood === 'chomp') {
-    eyes = (
-      <g stroke={INK} strokeWidth="3.5" strokeLinecap="round" fill="none">
-        <path d="M78 106 Q85 98 92 106" />
-        <path d="M108 106 Q115 98 122 106" />
-      </g>
-    );
-  } else if (mood === 'ringing') {
-    eyes = (
-      <g>
-        <circle cx="85" cy="103" r="8.5" fill={WHITE} stroke={INK} strokeWidth="3" />
-        <circle cx="115" cy="103" r="8.5" fill={WHITE} stroke={INK} strokeWidth="3" />
-        <circle cx="85" cy="104" r="3.2" fill={INK} />
-        <circle cx="115" cy="104" r="3.2" fill={INK} />
-      </g>
-    );
-  } else {
-    const big = mood === 'hungry' || mood === 'open';
-    eyes = (
-      <g className="bp-eyes">
-        <ellipse cx="85" cy="104" rx={big ? 7.5 : 6.5} ry={big ? 9 : 8} fill={INK} />
-        <ellipse cx="115" cy="104" rx={big ? 7.5 : 6.5} ry={big ? 9 : 8} fill={INK} />
-        <circle cx="87.5" cy="100" r={big ? 3 : 2.4} fill={WHITE} />
-        <circle cx="117.5" cy="100" r={big ? 3 : 2.4} fill={WHITE} />
-      </g>
-    );
-  }
-
-  let mouth: ReactNode;
-  switch (mood) {
-    case 'sleepy':
-      mouth = <ellipse cx="100" cy="125" rx="3.5" ry="4" fill={INK} />;
-      break;
-    case 'ringing':
-      mouth = <ellipse cx="100" cy="126" rx="7" ry="6" fill={MOUTH} />;
-      break;
-    case 'hungry':
-      mouth = (
-        <g>
-          <ellipse cx="100" cy="125" rx="8.5" ry="7.5" fill={MOUTH} />
-          <ellipse cx="100" cy="129.5" rx="5" ry="2.8" fill={TONGUE} />
-        </g>
-      );
-      break;
-    case 'open':
-      mouth = (
-        <g>
-          <ellipse cx="100" cy="126" rx="12.5" ry="11.5" fill={MOUTH} />
-          <ellipse cx="100" cy="132" rx="7" ry="3.8" fill={TONGUE} />
-        </g>
-      );
-      break;
-    case 'chomp':
-      mouth = (
-        <path d="M89 124 L94.5 119.5 L100 124 L105.5 119.5 L111 124" stroke={INK} strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      );
-      break;
-    case 'happy':
-      mouth = (
-        <g>
-          <path d="M88 119 Q100 137 112 119 Z" fill={MOUTH} />
-          <path d="M93 128.5 Q100 134 107 128.5 Q100 124.5 93 128.5 Z" fill={TONGUE} />
-        </g>
-      );
-      break;
-    default:
-      mouth = <path d="M92 121 Q100 129 108 121" stroke={INK} strokeWidth="3.5" fill="none" strokeLinecap="round" />;
-  }
-
-  return (
-    <g>
-      {eyes}
-      <ellipse cx="71" cy="120" rx="7.5" ry="4.5" fill={p.cheek} opacity="0.75" />
-      <ellipse cx="129" cy="120" rx="7.5" ry="4.5" fill={p.cheek} opacity="0.75" />
-      {mouth}
-    </g>
+      </span>
+      {!tight && !silhouette && mood === 'sleepy' && !walking && !spinning && (
+        <span className="bp-fx bp-zzz" aria-hidden="true">
+          {[0, 1, 2].map((i) => (
+            <PixelArt key={i} rows={ZED} style={{ left: pct(0.5 + g.width * 0.3 + i * u * 3), top: pct(headY + u * 2 - i * u * 5), width: pct(u * (5 - i)), animationDelay: `${i * 0.6}s` }} />
+          ))}
+        </span>
+      )}
+      {!tight && !silhouette && mood === 'happy' && !walking && !spinning && (
+        <span className="bp-fx bp-hearts" aria-hidden="true">
+          {[
+            [0.5 - g.width * 0.34, 0],
+            [0.5 + g.width * 0.22, 0.45],
+            [0.5 - g.width * 0.02, 0.9],
+          ].map(([x, d]) => (
+            <PixelArt key={d} rows={HEART} style={{ left: pct(x!), top: pct(headY - u * 4), width: pct(u * 7), animationDelay: `${d}s` }} />
+          ))}
+        </span>
+      )}
+      {!tight && !silhouette && mood === 'ringing' && (
+        <span className="bp-fx bp-waves" aria-hidden="true">
+          {[1, 2].map((i) => (
+            <PixelArt key={`r${i}`} rows={WAVE} className="bp-wave" style={{ left: pct(0.5 + g.width * 0.5 + i * u * 3.5 - u * 2), top: pct(headY + g.height * 0.2 - i * u), width: pct(u * 3), animationDelay: `${i * 0.12}s` }} />
+          ))}
+          {[1, 2].map((i) => (
+            <PixelArt key={`l${i}`} rows={WAVE} className="bp-wave bp-wave-l" style={{ left: pct(0.5 - g.width * 0.5 - i * u * 3.5 - u), top: pct(headY + g.height * 0.2 - i * u), width: pct(u * 3), animationDelay: `${i * 0.12}s` }} />
+          ))}
+        </span>
+      )}
+      {!tight && !silhouette && mood === 'chomp' && (
+        <span className="bp-fx bp-crumbs" aria-hidden="true">
+          {[-1.6, -0.6, 0.7, 1.5].map((dx, i) => {
+            const m = mouthPoint(species, stage);
+            return <span key={dx} style={{ left: pct(m.x + dx * u * 2), top: pct(m.y + u * (1 + (i % 2))), width: pct(u * 1.2), height: pct(u * 1.2), animationDelay: `${i * 0.05}s` }} />;
+          })}
+        </span>
+      )}
+    </span>
   );
-}
-
-function features(species: Species, stage: Stage, p: Palette, silhouette: boolean): { behind: ReactNode; front: ReactNode } {
-  const line = { stroke: p.outline, strokeWidth: 3.5, strokeLinejoin: 'round' as const };
-  const gold = silhouette ? INK : GOLD;
-  const sparkles =
-    stage === 3 && !silhouette ? (
-      <g fill={GOLD} stroke={p.outline} strokeWidth="1.5">
-        {[
-          [30, 66, 9],
-          [170, 50, 11],
-          [174, 130, 7],
-          [26, 136, 7],
-        ].map(([x, y, r]) => (
-          <path key={`${x}-${y}`} className="bp-sparkle" d={star(x, y, r)} />
-        ))}
-      </g>
-    ) : null;
-
-  switch (species) {
-    case 'ding': {
-      const handle = stage < 3 ? <circle cx="100" cy="42" r="9.5" fill="none" stroke={p.outline} strokeWidth="6" /> : null;
-      const bow =
-        stage >= 2 ? (
-          <g {...line} fill={p.accent}>
-            <path d="M100 153 L82 145 L82 161 Z" />
-            <path d="M100 153 L118 145 L118 161 Z" />
-            <circle cx="100" cy="153" r="4.5" />
-          </g>
-        ) : null;
-      const crown =
-        stage === 3 ? (
-          <g>
-            <path d="M74 60 L80 31 L91 46 L100 25 L109 46 L120 31 L126 60 Z" fill={gold} {...line} />
-            <circle cx="100" cy="38" r="3.5" fill={p.accent} />
-          </g>
-        ) : null;
-      return { behind: handle, front: <>{bow}{crown}{sparkles}</> };
-    }
-    case 'chime': {
-      const small = stage === 1;
-      const ears = (
-        <g>
-          <path d={small ? 'M66 84 L70 44 L96 60 Z' : 'M62 88 L63 32 L98 58 Z'} fill={p.body} {...line} />
-          <path d={small ? 'M134 84 L130 44 L104 60 Z' : 'M138 88 L137 32 L102 58 Z'} fill={p.body} {...line} />
-          <path d={small ? 'M72 73 L74 55 L87 62 Z' : 'M69 76 L69 46 L89 60 Z'} fill={p.cheek} />
-          <path d={small ? 'M128 73 L126 55 L113 62 Z' : 'M131 76 L131 46 L111 60 Z'} fill={p.cheek} />
-        </g>
-      );
-      const tail =
-        stage >= 2 ? (
-          <g fill="none" strokeLinecap="round">
-            <path d="M136 142 C168 144 172 108 154 100" stroke={p.outline} strokeWidth="15" />
-            <path d="M136 142 C168 144 172 108 154 100" stroke={p.body} strokeWidth="8" />
-          </g>
-        ) : null;
-      const whiskers = (
-        <g stroke={p.outline} strokeWidth="2.5" strokeLinecap="round">
-          <path d="M62 115 L44 111" />
-          <path d="M62 122 L44 124" />
-          <path d="M138 115 L156 111" />
-          <path d="M138 122 L156 124" />
-        </g>
-      );
-      const mega =
-        stage === 3 ? (
-          <g>
-            <circle cx="100" cy="155" r="6.5" fill={gold} {...line} />
-            <path d={star(100, 76, 8)} fill={gold} stroke={p.outline} strokeWidth="1.5" />
-          </g>
-        ) : null;
-      return { behind: <>{tail}{ears}</>, front: <>{whiskers}{mega}{sparkles}</> };
-    }
-    case 'buzz': {
-      const antennae =
-        stage === 1 ? (
-          <g>
-            <path d="M100 52 L100 28" stroke={p.outline} strokeWidth="4.5" strokeLinecap="round" />
-          </g>
-        ) : (
-          <g stroke={p.outline} strokeWidth="4.5" strokeLinecap="round">
-            <path d="M90 54 L80 29" />
-            <path d="M110 54 L120 29" />
-          </g>
-        );
-      const balls =
-        stage === 1 ? (
-          <circle cx="100" cy="23" r="7.5" fill={p.accent} {...line} />
-        ) : (
-          <g fill={p.accent} {...line}>
-            <circle cx="78" cy="24" r="7.5" />
-            <circle cx="122" cy="24" r="7.5" />
-          </g>
-        );
-      const light = stage >= 2 ? <circle cx="100" cy="139" r="3.8" fill={p.accent} stroke={p.outline} strokeWidth="2" /> : null;
-      const bolts =
-        stage === 3 ? (
-          <g fill={p.shade} {...line}>
-            <circle cx="61" cy="120" r="5.5" />
-            <circle cx="139" cy="120" r="5.5" />
-          </g>
-        ) : null;
-      return { behind: antennae, front: <>{balls}{light}{bolts}{sparkles}</> };
-    }
-    case 'jingle': {
-      const ry = stage === 1 ? 22 : 29;
-      const cy = stage === 1 ? 40 : 33;
-      const ears = (
-        <g>
-          <ellipse cx="84" cy={cy} rx="10.5" ry={ry} transform={`rotate(-14 84 ${cy})`} fill={p.body} {...line} />
-          <ellipse cx="116" cy={cy} rx="10.5" ry={ry} transform={`rotate(14 116 ${cy})`} fill={p.body} {...line} />
-          <ellipse cx="84" cy={cy + 2} rx="4.5" ry={ry - 9} transform={`rotate(-14 84 ${cy})`} fill={p.cheek} />
-          <ellipse cx="116" cy={cy + 2} rx="4.5" ry={ry - 9} transform={`rotate(14 116 ${cy})`} fill={p.cheek} />
-        </g>
-      );
-      const flower =
-        stage === 2 ? (
-          <g>
-            {[0, 72, 144, 216, 288].map((deg) => (
-              <circle key={deg} cx={126 + 6 * Math.cos((deg * Math.PI) / 180)} cy={62 + 6 * Math.sin((deg * Math.PI) / 180)} r="4.6" fill={silhouette ? INK : WHITE} stroke={p.outline} strokeWidth="1.5" />
-            ))}
-            <circle cx="126" cy="62" r="3.6" fill={gold} />
-          </g>
-        ) : null;
-      const bow =
-        stage === 3 ? (
-          <g {...line} fill={p.accent}>
-            <path d="M100 58 L85 50 L85 66 Z" />
-            <path d="M100 58 L115 50 L115 66 Z" />
-            <circle cx="100" cy="58" r="4.5" />
-          </g>
-        ) : null;
-      return { behind: ears, front: <>{flower}{bow}{sparkles}</> };
-    }
-    case 'gong': {
-      const big = stage >= 2;
-      const horns = (
-        <g fill={silhouette ? INK : '#FFE3B3'} {...line}>
-          <path d={big ? 'M78 64 C66 52 64 36 72 22 C78 38 86 50 94 56 Z' : 'M80 62 C71 52 70 40 77 30 C80 43 87 52 93 56 Z'} />
-          <path d={big ? 'M122 64 C134 52 136 36 128 22 C122 38 114 50 106 56 Z' : 'M120 62 C129 52 130 40 123 30 C120 43 113 52 107 56 Z'} />
-        </g>
-      );
-      const spikes = big ? (
-        <g fill={p.accent} {...line}>
-          <path d="M63 88 L47 94 L62 102 Z" />
-          <path d="M61 108 L45 114 L61 122 Z" />
-          <path d="M137 88 L153 94 L138 102 Z" />
-          <path d="M139 108 L155 114 L139 122 Z" />
-        </g>
-      ) : null;
-      const wings =
-        stage === 3 ? (
-          <g fill={p.shade} {...line}>
-            <path d="M64 110 C34 100 22 72 32 54 C42 72 54 82 70 88 Z" />
-            <path d="M136 110 C166 100 178 72 168 54 C158 72 146 82 130 88 Z" />
-          </g>
-        ) : null;
-      return { behind: <>{wings}{spikes}</>, front: <>{horns}{sparkles}</> };
-    }
-  }
 }

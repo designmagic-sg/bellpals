@@ -39,7 +39,7 @@ export function Phone({ compact }: { compact: boolean }) {
   return (
     <PhoneUIContext.Provider value={ui}>
       <div className={`phone${compact ? ' is-compact' : ''}`}>
-        <div className="app">
+        <div className={`app${ready ? ' has-tabs' : ''}`}>
           {!compact && <StatusBar />}
           <main className="app-main" key={ready ? tab : state.signedIn ? state.step : 'welcome'}>
             {!state.signedIn ? <Welcome /> : !ready ? <Onboarding /> : <TabContent tab={tab} />}

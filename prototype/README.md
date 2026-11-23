@@ -27,11 +27,17 @@ State is saved in the browser (`localStorage`); **Reset prototype** clears it. N
 
 ```text
 src/domain/       Product rules (pure TypeScript + Vitest tests). Reuse these in the real app.
-src/data/         The 5 BellPals and the sample people, groups and contacts
+src/data/         The 4 BellPals so far and the sample people, groups and contacts
 src/state/        Store (reducer), clock, engine (scheduling, simulated pals, sound)
-src/components/   BellPal art (SVG, 5 × 3 forms), treats, time wheel, swipe, feeding game
+src/components/   BellPal sprites and animations, the pet's room on Home, pixel treats, time wheel, swipe, feeding game
 src/phone/        The app: sign-up, tabs, sheets, alarm screens
 src/demo/         Prototype controls, pals' phones panel, BellPal gallery
+art/source/       The design team's character art (pixel art exports)
+scripts/          make_sprites.py turns art/source into src/assets/bellpals; make-artifact.mjs builds the hosting fragment
 ```
 
-The BellPal art is placeholder SVG drawn in code, for the design team to replace.
+## The BellPals
+
+The four BellPals are the design team's pixel art. `scripts/make_sprites.py` (Python 3 with numpy and Pillow) cuts them out, flattens their colours to a small palette and paints the frames the art doesn't include: blinking, sleepy eyes and an open mouth for eating. Run it from `prototype/` after replacing a file in `art/source/`.
+
+They move like a little LCD pet: in whole art pixels, with stepped timing. On Home your BellPal wanders round its room by day, sits and turns around (Ding has a full pose sheet), and sleeps from 9 pm to 6 am. Tap it to make it hop. Super and Mega wear a placeholder crown until their own art exists. **Demo → See every BellPal and mood** shows them all.
