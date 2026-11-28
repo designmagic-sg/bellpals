@@ -33,7 +33,7 @@ src/components/   BellPal sprites and animations, the pet's room on Home, pixel 
 src/phone/        The app: sign-up, tabs, sheets, alarm screens
 src/demo/         Prototype controls, pals' phones panel, BellPal gallery
 art/source/       The design team's character art (pixel art exports)
-scripts/          make_sprites.py turns art/source into src/assets/bellpals; make-artifact.mjs builds the hosting fragment
+scripts/          make_sprites.py turns art/source into src/assets/bellpals; export_animations.py exports the animations for games; make-artifact.mjs builds the hosting fragment
 ```
 
 ## The BellPals
@@ -41,3 +41,5 @@ scripts/          make_sprites.py turns art/source into src/assets/bellpals; mak
 The four BellPals are the design team's pixel art. `scripts/make_sprites.py` (Python 3 with numpy and Pillow) cuts them out, flattens their colours to a small palette and paints the frames the art doesn't include: blinking, sleepy eyes and an open mouth for eating. Run it from `prototype/` after replacing a file in `art/source/`.
 
 They move like a little LCD pet: in whole art pixels, with stepped timing. On Home your BellPal wanders round its room by day, sits and turns around (Ding has a full pose sheet), and sleeps from 9 pm to 6 am. Tap it to make it hop. Super and Mega wear a placeholder crown until their own art exists. **Demo → See every BellPal and mood** shows them all.
+
+To use the BellPals in another game, run `python3 scripts/export_animations.py` from `prototype/` (needs Pillow). It replays every animation frame by frame and writes `export/bellpals-animations/` and a zip of it: sprite sheets, single frames, GIFs, the still poses and effects, and JSON with each frame's timing in Aseprite's format, which Phaser and PixiJS can load. The pack's own README covers sizes, anchor points and loading it in common engines. `export/` isn't committed.
